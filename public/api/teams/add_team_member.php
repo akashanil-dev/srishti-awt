@@ -3,35 +3,44 @@
 include("../../../config/database.php");
 include("../../../app/helpers/response.php");
 
-$team_id = $_POST['team_id'];
-$email = $_POST['email'];
+$data = json_decode(file_get_contents("php://input"), true);
 
-$sql = "SELECT event_id FROM teams WHERE team_id=$team_id";
-$result = mysqli_query($conn, $sql);
+$team_id = $data['team_id'];
+$user_id = $data['user_id'];
 
-$team = mysqli_fetch_assoc($result);
-$event_id = $team['event_id'];
-
-$sql2 = "SELECT max_team_size FROM events WHERE event_id=$event_id";
-$result2 = mysqli_query($conn, $sql2);
-
-$event = mysqli_fetch_assoc($result2);
-$max = $event['max_team_size'];
-
-$sql3 = "SELECT COUNT(*) AS total FROM team_members WHERE team_id=$team_id";
-$result3 = mysqli_query($conn, $sql3);
-
-$count = mysqli_fetch_assoc($result3)['total'];
-
-if ($count >= $max) {
-    sendResponse(false, array(), "Team full");
+if(empty($team_id) || empty($user_id)){
+    sendResponse(false,[],"Team ID and User ID required");
 }
 
-$sql4 = "INSERT INTO team_members(team_id,email)
-         VALUES($team_id,'$email')";
+/* Check if team exists */
 
-mysqli_query($conn, $sql4);
+$team_check = "SELECT * FROM teams WHERE id='$team_id'";
+$team_result = mysqli_query($conn,$team_check);
 
-sendResponse(true);
+if(mysqli_num_rows($team_result) == 0){
+    sendResponse(false,[],"Team not found");
+}
+
+/* Check if user already in team */
+
+$check = "SELECT * FROM team_members 
+          WHERE team_id='$team_id' AND user_id='$user_id'";
+
+$check_result = mysqli_query($conn,$check);
+
+if(mysqli_num_rows($check_result) > 0){
+    sendResponse(false,[],"User already in team");
+}
+
+/* Insert member */
+
+$sql = "INSERT INTO team_members (team_id,user_id)
+        VALUES ('$team_id','$user_id')";
+
+if(mysqli_query($conn,$sql)){
+    sendResponse(true,[],"Team member added");
+}else{
+    sendResponse(false,[],"Failed to add member");
+}
 
 ?>

@@ -4,22 +4,29 @@ include("../../../config/database.php");
 include("../../../app/helpers/response.php");
 include("../../../app/middleware/admin.php");
 
-$title = $_POST['title'];
-$description = $_POST['description'];
-$category = $_POST['category'];
-$type = $_POST['event_type'];
-$team_size = $_POST['max_team_size'];
-$seats = $_POST['total_seats'];
-$date = $_POST['event_date'];
-$location = $_POST['location'];
+$data = json_decode(file_get_contents("php://input"), true);
+
+$title = $data['title'];
+$description = $data['description'];
+$date = $data['event_date'];
+$max_participants = $data['max_participants'];
+$created_by = $data['created_by'];
+
+if(empty($title) || empty($date) || empty($max_participants)){
+    sendResponse(false,[],"Required fields missing");
+}
 
 $sql = "INSERT INTO events
-(title,description,category,event_type,max_team_size,total_seats,event_date,location)
+(title,description,event_date,max_participants,created_by)
 VALUES
-('$title','$description','$category','$type',$team_size,$seats,'$date','$location')";
+('$title','$description','$date','$max_participants','$created_by')";
 
-mysqli_query($conn,$sql);
+$result = mysqli_query($conn,$sql);
 
-sendResponse(true);
+if($result){
+    sendResponse(true,[],"Event created successfully");
+}else{
+    sendResponse(false,[],"Event creation failed");
+}
 
 ?>

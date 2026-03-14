@@ -4,16 +4,31 @@ include("../../../config/database.php");
 include("../../../app/helpers/response.php");
 include("../../../app/middleware/admin.php");
 
-$event_id = $_POST['event_id'];
-$title = $_POST['title'];
-$description = $_POST['description'];
+$data = json_decode(file_get_contents("php://input"), true);
 
-$sql = "UPDATE events
-        SET title='$title',description='$description'
-        WHERE event_id=$event_id";
+$id = $data['id'];
+$title = $data['title'];
+$description = $data['description'];
+$event_date = $data['event_date'];
+$max_participants = $data['max_participants'];
 
-mysqli_query($conn, $sql);
+if(empty($id)){
+    sendResponse(false,[],"Event ID required");
+}
 
-sendResponse(true);
+$sql = "UPDATE events 
+        SET title='$title',
+            description='$description',
+            event_date='$event_date',
+            max_participants='$max_participants'
+        WHERE id='$id'";
+
+$result = mysqli_query($conn,$sql);
+
+if($result){
+    sendResponse(true,[],"Event updated successfully");
+}else{
+    sendResponse(false,[],"Update failed");
+}
 
 ?>

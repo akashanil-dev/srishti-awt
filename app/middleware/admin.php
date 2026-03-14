@@ -1,11 +1,15 @@
 <?php
 
-session_start();
+$data = json_decode(file_get_contents("php://input"), true);
 
-if(!isset($_SESSION['user_id']) || $_SESSION['role'] != "admin"){
-    sendResponse(false,array(),"Admin access required");
+$user_id = $data['created_by'];
+
+$sql = "SELECT role FROM users WHERE id='$user_id'";
+$result = mysqli_query($conn,$sql);
+$user = mysqli_fetch_assoc($result);
+
+if($user['role'] != 'admin'){
+    sendResponse(false,[],"Admin access required");
 }
-
-$user_id = $_SESSION['user_id'];
 
 ?>

@@ -4,12 +4,22 @@ include("../../../config/database.php");
 include("../../../app/helpers/response.php");
 include("../../../app/middleware/admin.php");
 
-$event_id = $_POST['event_id'];
+$data = json_decode(file_get_contents("php://input"), true);
 
-$sql = "DELETE FROM events WHERE event_id=$event_id";
+$id = $data['id'];
 
-mysqli_query($conn, $sql);
+if(empty($id)){
+    sendResponse(false,[],"Event ID required");
+}
 
-sendResponse(true);
+$sql = "DELETE FROM events WHERE id='$id'";
+
+$result = mysqli_query($conn,$sql);
+
+if($result){
+    sendResponse(true,[],"Event deleted successfully");
+}else{
+    sendResponse(false,[],"Delete failed");
+}
 
 ?>

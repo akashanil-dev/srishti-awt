@@ -4,28 +4,28 @@ include("../../../config/database.php");
 include("../../../app/helpers/response.php");
 
 $sql = "SELECT 
-        e.event_id,
+        e.id,
         e.title,
         e.description,
-        e.category,
-        e.total_seats,
-        COUNT(r.registration_id) AS registered
+        e.event_date,
+        e.max_participants,
+        COUNT(r.id) AS registered
         FROM events e
-        LEFT JOIN registrations r
-        ON e.event_id = r.event_id
-        GROUP BY e.event_id";
+        LEFT JOIN event_registrations r
+        ON e.id = r.event_id
+        GROUP BY e.id";
 
-$result = mysqli_query($conn, $sql);
+$result = mysqli_query($conn,$sql);
 
-$events = array();
+$events = [];
 
-while ($row = mysqli_fetch_assoc($result)) {
+while($row = mysqli_fetch_assoc($result)){
 
-    $row["available_seats"] = $row["total_seats"] - $row["registered"];
+    $row["available_seats"] = $row["max_participants"] - $row["registered"];
 
     $events[] = $row;
 }
 
-sendResponse(true, $events);
+sendResponse(true,$events);
 
 ?>

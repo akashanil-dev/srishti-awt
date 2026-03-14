@@ -1,6 +1,7 @@
 <?php
 
 include("../../../config/database.php");
+include("../../../app/helpers/response.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -8,33 +9,26 @@ $email = $data['email'];
 $password = $data['password'];
 
 $sql = "SELECT * FROM users WHERE email='$email'";
-$result = mysqli_query($conn, $sql);
+$result = mysqli_query($conn,$sql);
 
-if (mysqli_num_rows($result) > 0) {
+if(mysqli_num_rows($result) > 0){
 
     $user = mysqli_fetch_assoc($result);
 
-    if ($user['password'] == $password) {
+    if($user['password'] == $password){
 
-        echo json_encode([
-            "status" => "success",
-            "message" => "Login successful",
-            "user" => $user
-        ]);
+        sendResponse(true,$user,"Login successful");
 
     } else {
-        echo json_encode([
-            "status" => "error",
-            "message" => "Invalid password"
-        ]);
+
+        sendResponse(false,[],"Invalid password");
+
     }
 
-} else {
+}else{
 
-    echo json_encode([
-        "status" => "error",
-        "message" => "User not found"
-    ]);
+    sendResponse(false,[],"User not found");
+
 }
 
 ?>
