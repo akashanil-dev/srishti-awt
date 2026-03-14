@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Srishti Dashboard</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="css/home.css" />
+</head>
+
+<body>
+
+    <!-- TOPBAR -->
+    <nav class="topbar">
+        <a href="index.html" class="topbar-logo">
+            <div class="dot"><svg viewBox="0 0 24 24">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                </svg></div>
+            SRISHTI '26
+        </a>
+        <div class="topbar-right">
+            <div class="notif-btn" title="Notifications">
+                <svg viewBox="0 0 24 24" stroke-width="2">
+                    <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+                    <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+                </svg>
+                <div class="notif-dot"></div>
+            </div>
+            <div class="user-dropdown" id="userDropdown">
+                <div class="user-avatar-btn" onclick="toggleDropdown()">
+                    <div class="avatar" id="avatarInitials">AJ</div>
+                    <span class="user-name" id="topbarUserName">Alex Johnson</span>
+                    <svg class="chevron" viewBox="0 0 24 24" stroke-width="2">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </div>
+                <div class="dropdown-menu-custom">
+                    <div class="dropdown-user-header">
+                        <div class="duh-name" id="dropdownUserName">Alex Johnson</div>
+                        <div class="duh-email" id="dropdownUserEmail">alex@college.edu</div>
+                    </div>
+                    <button class="dropdown-item-custom" onclick="goToAccount()">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                            <circle cx="12" cy="7" r="4" />
+                        </svg>
+                        Account
+                    </button>
+                    <div class="dropdown-divider"></div>
+                    <button class="dropdown-item-custom danger" onclick="logout()">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                            <polyline points="16 17 21 12 16 7" />
+                            <line x1="21" y1="12" x2="9" y2="12" />
+                        </svg>
+                        Log Out
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="page-body">
+
+        <!-- HERO -->
+        <div class="dash-hero">
+            <div class="dash-hero-inner">
+                <div>
+                    <div class="greeting-tag"><span class="pulse"></span> SRISHTI '26 is live!</div>
+                    <h1 class="dash-heading">
+                        Hey, <span class="accent" id="heroUserName">Alex</span> 👋<br>
+                        Explore &amp; Register.
+                    </h1>
+                    <p class="dash-sub">Browse all available events below. Click any card to see full details and
+                        register your spot before seats run out.</p>
+                </div>
+                <div class="dash-hero-right">
+                    <div class="quick-stat-box">
+                        <div class="qs-item">
+                            <div class="qs-num" id="statTotal">6</div>
+                            <div class="qs-label">Total Events</div>
+                        </div>
+                        <div class="qs-divider"></div>
+                        <div class="qs-item">
+                            <div class="qs-num" id="statOpen">5</div>
+                            <div class="qs-label">Seats Open</div>
+                        </div>
+                        <div class="qs-divider"></div>
+                        <div class="qs-item">
+                            <div class="qs-num" id="statRegistered">0</div>
+                            <div class="qs-label">My Registrations</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- EVENTS -->
+        <div class="content-area">
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <span class="toolbar-title">Available Events</span>
+                    <span class="event-count-badge" id="visibleCount">6 events</span>
+                </div>
+                <div class="toolbar-right">
+                    <div class="search-wrap">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" class="search-input" id="searchInput" placeholder="Search events…"
+                            oninput="handleSearch()" />
+                    </div>
+                    <div class="filter-tabs">
+                        <button class="ftab active" onclick="filterTab('all',this)">All</button>
+                        <button class="ftab" onclick="filterTab('workshop',this)">Workshops</button>
+                        <button class="ftab" onclick="filterTab('hackathon',this)">Hackathons</button>
+                        <button class="ftab" onclick="filterTab('seminar',this)">Seminars</button>
+                        <button class="ftab" onclick="filterTab('competition',this)">Competitions</button>
+                    </div>
+                    <select class="sort-select" id="sortSelect" onchange="applySort()">
+                        <option value="date">Sort: Date</option>
+                        <option value="seats">Sort: Seats left</option>
+                        <option value="title">Sort: Name A–Z</option>
+                    </select>
+                </div>
+            </div>
+            <div class="events-grid" id="eventsGrid"></div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════
+         EVENT DETAIL MODAL
+    ══════════════════════════════════ -->
+    <div class="modal-overlay" id="detailOverlay" onclick="closeDetailOutside(event)">
+        <div class="modal-box">
+            <div class="modal-stripe"></div>
+            <div class="modal-inner">
+                <div class="modal-top">
+                    <div class="modal-icon">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" />
+                            <line x1="16" y1="2" x2="16" y2="6" />
+                            <line x1="8" y1="2" x2="8" y2="6" />
+                            <line x1="3" y1="10" x2="21" y2="10" />
+                        </svg>
+                    </div>
+                    <div class="modal-title-block">
+                        <div class="modal-event-title" id="detailTitle">Event Title</div>
+                        <div id="detailBadge" style="margin-top:6px"></div>
+                    </div>
+                    <button class="modal-close-btn" onclick="closeDetail()">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-desc" id="detailDesc"></div>
+                <div class="modal-info-grid">
+                    <div class="info-tile">
+                        <div class="info-tile-label">Date</div>
+                        <div class="info-tile-value">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            <span id="detailDate">—</span>
+                        </div>
+                    </div>
+                    <div class="info-tile">
+                        <div class="info-tile-label">Max Participants</div>
+                        <div class="info-tile-value">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                            </svg>
+                            <span id="detailMax">—</span>
+                        </div>
+                    </div>
+                    <div class="info-tile">
+                        <div class="info-tile-label">Seats Taken</div>
+                        <div class="info-tile-value">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            <span id="detailRegistered">—</span>
+                        </div>
+                    </div>
+                    <div class="info-tile">
+                        <div class="info-tile-label">Seats Remaining</div>
+                        <div class="info-tile-value" id="detailLeft" style="color:var(--green)">—</div>
+                    </div>
+                </div>
+                <div class="modal-seats-section">
+                    <div class="modal-seats-header">
+                        <div class="modal-seats-title">Seat Availability</div>
+                        <div class="seats-pill" id="detailSeatsPill">—</div>
+                    </div>
+                    <div class="modal-seat-bar">
+                        <div class="modal-seat-fill" id="detailSeatsBar" style="width:0%"></div>
+                    </div>
+                </div>
+                <div class="modal-footer-btns">
+                    <button class="btn-modal-register" id="detailRegBtn" onclick="openConfirm()">
+                        <svg viewBox="0 0 24 24" stroke-width="2.5" width="16" height="16" fill="none"
+                            stroke="currentColor">
+                            <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                        Register for this Event
+                    </button>
+                    <button class="btn-modal-close" onclick="closeDetail()">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════
+         CONFIRM REGISTRATION MODAL
+         (slider-to-confirm)
+    ══════════════════════════════════ -->
+    <div class="modal-overlay" id="confirmOverlay" onclick="closeConfirmOutside(event)">
+        <div class="modal-box">
+            <div class="modal-stripe"></div>
+            <div class="modal-inner">
+
+                <!-- Header -->
+                <div class="modal-top" style="margin-bottom:20px">
+                    <div>
+                        <div class="modal-event-title">Confirm Registration</div>
+                        <div style="color:var(--gray);font-size:0.85rem;margin-top:4px">Review your details and slide to
+                            confirm.</div>
+                    </div>
+                    <button class="modal-close-btn" onclick="closeConfirm()">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Registering as: -->
+                <div
+                    style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">
+                    Registering as</div>
+                <div class="user-summary-card">
+                    <div class="usc-avatar" id="confirmAvatar">AJ</div>
+                    <div class="usc-info">
+                        <div class="usc-name" id="confirmUserName">Alex Johnson</div>
+                        <div class="usc-email" id="confirmUserEmail">alex@college.edu</div>
+                    </div>
+                    <div class="usc-badge">Verified Student</div>
+                </div>
+
+                <!-- Event being registered for -->
+                <div
+                    style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">
+                    Registering for</div>
+                <div class="confirm-event-card">
+                    <div class="cec-label">Selected Event</div>
+                    <div class="cec-title" id="confirmEventTitle">Event Title</div>
+                    <div class="cec-meta">
+                        <div class="cec-meta-item">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <rect x="3" y="4" width="18" height="18" rx="2" />
+                                <line x1="16" y1="2" x2="16" y2="6" />
+                                <line x1="8" y1="2" x2="8" y2="6" />
+                                <line x1="3" y1="10" x2="21" y2="10" />
+                            </svg>
+                            <span id="confirmEventDate">—</span>
+                        </div>
+                        <div class="cec-meta-item">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                <circle cx="9" cy="7" r="4" />
+                            </svg>
+                            <span id="confirmSeatsLeft">— seats left</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Slider -->
+                <div class="slider-label" id="sliderLabel">Slide to confirm your registration →</div>
+                <div class="slider-track" id="sliderTrack">
+                    <div class="slider-fill" id="sliderFill"></div>
+                    <div class="slider-track-text" id="sliderText">Slide to Register</div>
+                    <div class="slider-arrows" id="sliderArrows">
+                        <svg viewBox="0 0 24 24" stroke-width="2.5">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                        <svg viewBox="0 0 24 24" stroke-width="2.5">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                        <svg viewBox="0 0 24 24" stroke-width="2.5">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </div>
+                    <div class="slider-thumb" id="sliderThumb">
+                        <svg viewBox="0 0 24 24" stroke-width="2.5">
+                            <polyline points="9 18 15 12 9 6" />
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Submitting indicator -->
+                <div class="confirm-submitting" id="confirmSubmitting">
+                    <span class="spinner"></span> Submitting your registration…
+                </div>
+
+                <!-- Cancel -->
+                <button class="confirm-cancel" id="confirmCancelBtn" onclick="closeConfirm()">Cancel</button>
+
+            </div>
+        </div>
+    </div>
+
+
+    <!-- TOAST -->
+    <div class="toast-wrap">
+        <div class="toast" id="toast">
+            <svg viewBox="0 0 24 24" stroke-width="2.5">
+                <polyline points="20 6 9 17 4 12" />
+            </svg>
+            <span id="toastMsg">Done!</span>
+        </div>
+    </div>
+
+
+    <script src="js/home.js"></script>
+</body>
+
+</html>
