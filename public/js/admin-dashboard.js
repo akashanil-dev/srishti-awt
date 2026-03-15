@@ -365,28 +365,35 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner white"></span> Deleting…';
 
-            /* ─── REPLACE WITH ────────────────────────────────────────────────────
-               fetch('admin_delete_event.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: pendingDeleteId }) })
-                 .then(r => r.json())
-                 .then(data => {
+            $.ajax({
+                url: 'api/admin/delete_event.php',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    id: pendingDeleteId,
+                    created_by: adminUser ? adminUser.id : 1
+                }),
+                dataType: 'json',
+                success: function(response) {
                    btn.disabled = false;
-                   btn.innerHTML = 'Delete Event';
-                   if (data.success) {
-                     events = events.filter(e => e.id !== pendingDeleteId);
-                     closeDelete(); renderTable(); updateStats();
-                     showToast('success', '🗑️ Event deleted.');
+                    btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" stroke="#fff" fill="none"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg> Delete Event';
+
+                    if (response.success) {
+                        closeDelete();
+                        // Reload events from server
+                        loadEvents();
+                        showToast('success', '🗑️ Event deleted successfully.');
                    } else {
-                     showToast('error', data.message || 'Could not delete.');
+                        showToast('error', response.message || 'Could not delete event.');
                    }
-                 });
-            ─────────────────────────────────────────────────────────────────── */
-            setTimeout(() => {
-                events = events.filter(ev => ev.id !== pendingDeleteId);
+                },
+                error: function(xhr, status, error) {
                 btn.disabled = false;
                 btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" stroke="#fff" fill="none"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg> Delete Event';
-                closeDelete(); renderTable(); updateStats();
-                showToast('success', '🗑️ Event deleted successfully.');
-            }, 800);
+                    showToast('error', 'Network error. Please try again.');
+                    console.error('Delete error:', status, error);
+                }
+            });
         }
 
         /* ═══════════════════════════════════════════
