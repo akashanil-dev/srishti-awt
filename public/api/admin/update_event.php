@@ -13,7 +13,7 @@ $event_date = $data['event_date'];
 $max_participants = $data['max_participants'];
 
 if(empty($id)){
-    sendResponse(false,[],"Event ID required");
+    sendResponse(false, [], "Event ID required");
 }
 
 $sql = "UPDATE events 
@@ -26,9 +26,9 @@ $sql = "UPDATE events
 $result = mysqli_query($conn,$sql);
 
 if($result){
-    sendResponse(true,[],"Event updated successfully");
+    sendResponse(true, [], "Event updated successfully");
 }else{
-    sendResponse(false,[],"Update failed");
+    sendResponse(false, [], "Update failed");
 }
 
 ?>
