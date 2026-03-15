@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 12, 2026 at 01:52 PM
+-- Generation Time: Mar 14, 2026 at 05:59 PM
 -- Server version: 8.0.45
 -- PHP Version: 8.2.12
 
@@ -29,13 +29,13 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `events` (
   `id` int NOT NULL,
-  `title` varchar(200) DEFAULT NULL,
+  `title` varchar(200) NOT NULL,
   `description` text,
-  `event_date` date DEFAULT NULL,
-  `max_participants` int DEFAULT NULL,
+  `event_date` date NOT NULL,
+  `max_participants` int NOT NULL,
   `created_by` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ;
 
 --
 -- Dumping data for table `events`
@@ -53,8 +53,8 @@ INSERT INTO `events` (`id`, `title`, `description`, `event_date`, `max_participa
 
 CREATE TABLE `event_registrations` (
   `id` int NOT NULL,
-  `user_id` int DEFAULT NULL,
-  `event_id` int DEFAULT NULL,
+  `user_id` int NOT NULL,
+  `event_id` int NOT NULL,
   `registered_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
@@ -75,7 +75,7 @@ INSERT INTO `event_registrations` (`id`, `user_id`, `event_id`, `registered_at`)
 
 CREATE TABLE `teams` (
   `id` int NOT NULL,
-  `team_name` varchar(100) DEFAULT NULL,
+  `team_name` varchar(100) NOT NULL,
   `event_id` int DEFAULT NULL,
   `created_by` int DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
@@ -116,12 +116,12 @@ INSERT INTO `team_members` (`id`, `team_id`, `user_id`) VALUES
 
 CREATE TABLE `users` (
   `id` int NOT NULL,
-  `name` varchar(100) DEFAULT NULL,
-  `email` varchar(100) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
+  `name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
   `role` enum('user','admin') DEFAULT 'user',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `phone` varchar(15) DEFAULT NULL
+  `phone` varchar(15) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
@@ -134,7 +134,8 @@ INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`, `p
 (3, 'Alice', 'alice@test.com', '123456', 'user', '2026-03-12 12:28:41', '9988776655'),
 (4, 'David', 'david@test.com', '123456', 'user', '2026-03-12 12:28:41', '9012345678'),
 (5, 'Mike', 'mike@test.com', '123456', 'user', '2026-03-12 12:42:20', '9898989898'),
-(7, 'Rahul', 'rahul@test.com', '123456', 'user', '2026-03-12 12:48:37', '9078563412');
+(7, 'Rahul', 'rahul@test.com', '123456', 'user', '2026-03-12 12:48:37', '9078563412'),
+(8, 'Arjun', 'arjun@test.com', '123456', 'user', '2026-03-14 14:31:47', '9982345671');
 
 --
 -- Indexes for dumped tables
@@ -152,23 +153,24 @@ ALTER TABLE `events`
 --
 ALTER TABLE `event_registrations`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`),
-  ADD KEY `event_id` (`event_id`);
+  ADD UNIQUE KEY `unique_user_event` (`user_id`,`event_id`),
+  ADD KEY `idx_event_user` (`user_id`),
+  ADD KEY `idx_event_event` (`event_id`);
 
 --
 -- Indexes for table `teams`
 --
 ALTER TABLE `teams`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `event_id` (`event_id`),
-  ADD KEY `created_by` (`created_by`);
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `idx_team_event` (`event_id`);
 
 --
 -- Indexes for table `team_members`
 --
 ALTER TABLE `team_members`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `team_id` (`team_id`),
+  ADD UNIQUE KEY `unique_team_user` (`team_id`,`user_id`),
   ADD KEY `user_id` (`user_id`);
 
 --
@@ -186,7 +188,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `events`
 --
 ALTER TABLE `events`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `event_registrations`
@@ -210,7 +212,7 @@ ALTER TABLE `team_members`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- Constraints for dumped tables
@@ -227,20 +229,20 @@ ALTER TABLE `events`
 --
 ALTER TABLE `event_registrations`
   ADD CONSTRAINT `event_registrations_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
-  ADD CONSTRAINT `event_registrations_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`);
+  ADD CONSTRAINT `event_registrations_ibfk_2` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `teams`
 --
 ALTER TABLE `teams`
-  ADD CONSTRAINT `teams_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`),
+  ADD CONSTRAINT `teams_ibfk_1` FOREIGN KEY (`event_id`) REFERENCES `events` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `teams_ibfk_2` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`);
 
 --
 -- Constraints for table `team_members`
 --
 ALTER TABLE `team_members`
-  ADD CONSTRAINT `team_members_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`),
+  ADD CONSTRAINT `team_members_ibfk_1` FOREIGN KEY (`team_id`) REFERENCES `teams` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `team_members_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`);
 COMMIT;
 
