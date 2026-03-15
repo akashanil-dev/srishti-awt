@@ -2,8 +2,8 @@
 
 session_start();
 
-include("../../../config/database.php");
-include("../../../app/helpers/response.php");
+include_once("../../../config/database.php");
+include_once("../../../app/helpers/response.php");
 
 if(!isset($_SESSION['user_id'])){
     sendResponse(false, [], "Not logged in");
