@@ -238,3 +238,123 @@ function updateNav() {
     user.classList.remove('visible');
   }
 }
+/* ── REGISTRATION MODAL ── */
+function openReg(eventId) {
+  populateEventSelect();
+  if (eventId) document.getElementById('selectedEvent').value = eventId;
+  if (currentUser) {
+    document.getElementById('studentName').value = currentUser.name;
+    document.getElementById('studentEmail').value = currentUser.email;
+  }
+  document.getElementById('regOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeReg() {
+  document.getElementById('regOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('registrationForm').reset();
+  clearFormErrors('studentName', 'studentEmail', 'studentPhone', 'selectedEvent');
+}
+function closeRegOutside(e) { if (e.target === document.getElementById('regOverlay')) closeReg(); }
+
+function populateEventSelect() {
+  const sel = document.getElementById('selectedEvent');
+  sel.innerHTML = '<option value="">— Choose an event —</option>' +
+    events.filter(e => e.seats - e.registered > 0)
+      .map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+}
+
+document.getElementById('registrationForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  let ok = true;
+  ok &= vf('studentName', 'nameErr', v => v.length >= 2, 'Please enter your full name.');
+  ok &= vf('studentEmail', 'emailErr', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Please enter a valid email.');
+  ok &= vf('studentPhone', 'phoneErr', v => /^[\d\s\+\-]{7,15}$/.test(v), 'Please enter a valid phone number.');
+  ok &= vf('selectedEvent', 'eventErr', v => v !== '', 'Please select an event.');
+  if (!ok) return;
+
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true; btn.textContent = 'Submitting…';
+
+  const fd = new FormData();
+  fd.append('name', document.getElementById('studentName').value.trim());
+  fd.append('email', document.getElementById('studentEmail').value.trim());
+  fd.append('phone', document.getElementById('studentPhone').value.trim());
+  fd.append('event_id', document.getElementById('selectedEvent').value);
+
+  $.ajax({
+        url: 'api/events/register_event.php',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            user_id: currentUser.id,
+            event_id: $('#selectedEvent').val()
+        }),
+        dataType: 'json',
+        success: function(response) {
+            closeReg();
+            btn.disabled = false;
+            btn.textContent = 'Complete Registration →';
+            showToast(response.success ? '✅ ' + response.message : '⚠️ ' + response.message);
+            if (response.success) loadEvents(); // Refresh seat counts
+        }
+    });
+});
+
+function loadParticipants() {
+  const list = document.getElementById('participantsList');
+  list.innerHTML = `<div class="table-row"><span style="grid-column:1/-1;text-align:center;color:var(--gray)">Loading…</span></div>`;
+
+  $.ajax({
+      url: 'api/events/get_event_participants.php',
+      type: 'GET',
+      data: { event_id: selectedEventId },
+      dataType: 'json',
+      success: function(response) {
+          if (response.success) {
+               list.innerHTML = response.data.map(p => `
+                  <div class="table-row">
+                    <span class="participant-name">${p.name}</span>
+                    <span style="color:var(--gray);font-size:0.85rem">${p.email}</span>
+                    <span><span class="event-badge">${p.event}</span></span>
+                    <span><span class="status-badge status-${p.status}">${p.status}</span></span>
+                  </div>`).join('');
+          }
+      }
+  });
+}
+
+/* ── HELPERS ── */
+function vf(id, errId, check, msg) {
+  const val = document.getElementById(id).value.trim();
+  const el = document.getElementById(id);
+  const err = document.getElementById(errId);
+  if (!check(val)) {
+    el.classList.add('error'); err.textContent = msg; err.classList.add('show'); return false;
+  }
+  el.classList.remove('error'); err.classList.remove('show'); return true;
+}
+function clearFormErrors(...ids) {
+  ids.forEach(id => {
+    const el = document.getElementById(id); if (el) el.classList.remove('error');
+  });
+  document.querySelectorAll('.form-error').forEach(e => e.classList.remove('show'));
+}
+function togglePass(inputId, btn) {
+  const inp = document.getElementById(inputId);
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+  btn.style.opacity = inp.type === 'text' ? '0.45' : '1';
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+/* ── SCROLL ANIMATION ── */
+const obs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.12 });
+document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
+
