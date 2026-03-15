@@ -1,9 +1,9 @@
 <?php
 
-include("../config/db.php");
-include("../config/response.php");
+include_once("../../../config/database.php");
+include_once("../../../app/helpers/response.php");
+include_once("../../../app/middleware/auth.php");
 
-$user_id = $_GET['user_id'];
 
 if(empty($user_id)){
     sendResponse(false,[],"User ID required");

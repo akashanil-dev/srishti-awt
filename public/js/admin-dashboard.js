@@ -1,24 +1,9 @@
         /* ═══════════════════════════════════════════
-           ADMIN SESSION
-           In production: read from PHP session
+           ADMIN SESSION — loaded from backend
         ═══════════════════════════════════════════ */
-        const adminUser = { name: 'Super Admin', email: 'admin@techfest.edu' };
-
-        /* ═══════════════════════════════════════════
-           EVENT DATA
-           In production:
-             fetch('admin_get_events.php').then(r=>r.json()).then(data=>{ events=data; init(); });
-        ═══════════════════════════════════════════ */
-        let events = [
-            { id: 1, title: 'AI & Machine Learning Workshop', description: 'Hands-on session covering neural networks, model training, and real-world applications using Python and TensorFlow.', event_date: '2026-03-15', max_participants: 50, registered: 18, event_type: 'solo', team_min: null, team_max: null },
-            { id: 2, title: 'Full-Stack Dev Hackathon', description: '48-hour coding marathon. Build a complete web app from scratch. Cash prizes for top 3 teams. Participate solo or as a team of up to 4 members.', event_date: '2026-03-16', max_participants: 40, registered: 32, event_type: 'team', team_min: 2, team_max: 4 },
-            { id: 3, title: 'Cybersecurity CTF Challenge', description: 'Capture-the-Flag competition. Solve progressively harder real-world security puzzles across web exploitation, cryptography, and reverse engineering.', event_date: '2026-03-18', max_participants: 60, registered: 18, event_type: 'solo', team_min: null, team_max: null },
-            { id: 4, title: 'Cloud Computing Seminar', description: 'Industry experts from AWS and Google Cloud walk through modern cloud architecture, DevOps pipelines, container orchestration, and serverless deployment.', event_date: '2026-03-15', max_participants: 80, registered: 45, event_type: 'solo', team_min: null, team_max: null },
-            { id: 5, title: 'UI/UX Design Sprint', description: '2-day workshop covering wireframing, Figma prototyping, design systems, and user testing with real participants.', event_date: '2026-03-16', max_participants: 30, registered: 30, event_type: 'team', team_min: 2, team_max: 3 },
-            { id: 6, title: 'Blockchain & Web3 Talk', description: 'Deep dive into decentralised apps, smart contracts, NFT standards, and the evolving landscape of Web3 with seasoned developers.', event_date: '2026-03-18', max_participants: 100, registered: 55, event_type: 'solo', team_min: null, team_max: null },
-        ];
-
-        let nextId = 7;
+        let adminUser = null;
+        let events = [];
+        let nextId = 1;
         let pendingDeleteId = null;
         let isEditMode = false;
         let selectedType = null;   // 'solo' | 'team' | null
@@ -26,18 +11,53 @@
         let tableType = 'all';
         let tableStatus = 'all';
 
+        function loadEvents(callback) {
+            $.ajax({
+                url: 'api/events/get_events.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        events = response.data;
+                        if (events.length > 0) {
+                            nextId = Math.max(...events.map(e => parseInt(e.id))) + 1;
+                        }
+                        renderTable();
+                        updateStats();
+                        if (typeof callback === 'function') callback();
+                    } else {
+                        showToast('error', 'Failed to load events: ' + (response.message || 'Unknown error'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showToast('error', 'Network error loading events. Check your server.');
+                    console.error('Load events error:', status, error);
+                }
+            });
+        }
+
         /* ═══════════════════════════════════════════
-           INIT
+           INIT — check admin session, then load events
         ═══════════════════════════════════════════ */
         document.addEventListener('DOMContentLoaded', () => {
-            const initials = adminUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-            document.getElementById('navAvatar').textContent = initials;
-            document.getElementById('navUserName').textContent = adminUser.name;
-            document.getElementById('dropdownName').textContent = adminUser.name;
-            document.getElementById('dropdownEmail').textContent = adminUser.email;
-
-            renderTable();
-            updateStats();
+            // Verify admin session
+            $.ajax({
+                url: 'api/auth/check_session.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success && response.data.role === 'admin') {
+                        adminUser = response.data;
+                        setupAdminUI();
+                        loadEvents();
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                },
+                error: function() {
+                    window.location.href = 'index.html';
+                }
+            });
 
             // Set minimum date to today
             document.getElementById('fDate').min = new Date().toISOString().split('T')[0];
@@ -48,6 +68,14 @@
                     document.getElementById('userDropdown').classList.remove('open');
             });
         });
+
+        function setupAdminUI() {
+            const initials = adminUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+            document.getElementById('navAvatar').textContent = initials;
+            document.getElementById('navUserName').textContent = adminUser.name;
+            document.getElementById('dropdownName').textContent = adminUser.name;
+            document.getElementById('dropdownEmail').textContent = adminUser.email;
+        }
 
         /* ═══════════════════════════════════════════
            RENDER TABLE
@@ -191,7 +219,7 @@
            EDIT MODAL
         ═══════════════════════════════════════════ */
         function openEditModal(id) {
-            const e = events.find(ev => ev.id === id);
+            const e = events.find(ev => ev.id == id);
             if (!e) return;
             isEditMode = true;
 
@@ -277,48 +305,42 @@
             };
             if (isEditMode) payload.id = parseInt(document.getElementById('editEventId').value);
 
-            /* ─── REPLACE WITH ────────────────────────────────────────────────────
-               const url = isEditMode ? 'admin_update_event.php' : 'admin_create_event.php';
-               fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
-                 .then(r => r.json())
-                 .then(data => {
-                   btn.disabled = false;
-                   btn.innerHTML = isEditMode ? 'Save Changes' : 'Create Event';
-                   if (data.success) {
-                     if (isEditMode) {
-                       const idx = events.findIndex(e => e.id === payload.id);
-                       if (idx > -1) Object.assign(events[idx], payload);
-                     } else {
-                       events.push({ ...payload, id: data.id, registered: 0 });
-                     }
-                     closeForm(); renderTable(); updateStats();
-                     showToast('success', isEditMode ? '✅ Event updated!' : '✅ Event created!');
-                   } else {
-                     showToast('error', data.message || 'Something went wrong.');
-                   }
-                 });
-            ─────────────────────────────────────────────────────────────────── */
-            setTimeout(() => {
-                btn.disabled = false;
-                const label = isEditMode ? 'Save Changes' : 'Create Event';
-                btn.innerHTML = `<svg viewBox="0 0 24 24" stroke-width="2.5" width="14" height="14" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg> ${label}`;
-                if (isEditMode) {
-                    const idx = events.findIndex(ev => ev.id === payload.id);
-                    if (idx > -1) Object.assign(events[idx], payload);
-                    showToast('success', '✅ Event updated successfully!');
-                } else {
-                    events.push({ ...payload, id: nextId++, registered: 0 });
-                    showToast('success', '✅ Event created successfully!');
+            const url = isEditMode ? 'api/admin/update_event.php' : 'api/admin/create_event.php';
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                dataType: 'json',
+                success: function(response) {
+                    btn.disabled = false;
+                    const label = isEditMode ? 'Save Changes' : 'Create Event';
+                    btn.innerHTML = `<svg viewBox="0 0 24 24" stroke-width="2.5" width="14" height="14" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg> ${label}`;
+
+                    if (response.success) {
+                        closeForm();
+                        loadEvents();
+                        showToast('success', isEditMode ? '✅ Event updated successfully!' : '✅ Event created successfully!');
+                    } else {
+                        showToast('error', response.message || 'Something went wrong.');
+                    }
+                },
+                error: function(xhr, status, error) {
+                    btn.disabled = false;
+                    const label = isEditMode ? 'Save Changes' : 'Create Event';
+                    btn.innerHTML = `<svg viewBox="0 0 24 24" stroke-width="2.5" width="14" height="14" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg> ${label}`;
+                    showToast('error', 'Network error. Please try again.');
+                    console.error('Save error:', status, error);
                 }
-                closeForm(); renderTable(); updateStats();
-            }, 900);
+            });
         });
 
         /* ═══════════════════════════════════════════
            DELETE MODAL
         ═══════════════════════════════════════════ */
         function openDeleteModal(id) {
-            const e = events.find(ev => ev.id === id);
+            const e = events.find(ev => ev.id == id);
             if (!e) return;
             pendingDeleteId = id;
             document.getElementById('deleteEventName').textContent = e.title;
@@ -333,28 +355,35 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner white"></span> Deleting…';
 
-            /* ─── REPLACE WITH ────────────────────────────────────────────────────
-               fetch('admin_delete_event.php', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ id: pendingDeleteId }) })
-                 .then(r => r.json())
-                 .then(data => {
+            $.ajax({
+                url: 'api/admin/delete_event.php',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    id: pendingDeleteId,
+                    created_by: adminUser ? adminUser.id : 1
+                }),
+                dataType: 'json',
+                success: function(response) {
                    btn.disabled = false;
-                   btn.innerHTML = 'Delete Event';
-                   if (data.success) {
-                     events = events.filter(e => e.id !== pendingDeleteId);
-                     closeDelete(); renderTable(); updateStats();
-                     showToast('success', '🗑️ Event deleted.');
+                    btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" stroke="#fff" fill="none"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg> Delete Event';
+
+                    if (response.success) {
+                        closeDelete();
+                        // Reload events from server
+                        loadEvents();
+                        showToast('success', '🗑️ Event deleted successfully.');
                    } else {
-                     showToast('error', data.message || 'Could not delete.');
+                        showToast('error', response.message || 'Could not delete event.');
                    }
-                 });
-            ─────────────────────────────────────────────────────────────────── */
-            setTimeout(() => {
-                events = events.filter(ev => ev.id !== pendingDeleteId);
+                },
+                error: function(xhr, status, error) {
                 btn.disabled = false;
                 btn.innerHTML = '<svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" stroke="#fff" fill="none"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M9 6V4h6v2"/></svg> Delete Event';
-                closeDelete(); renderTable(); updateStats();
-                showToast('success', '🗑️ Event deleted successfully.');
-            }, 800);
+                    showToast('error', 'Network error. Please try again.');
+                    console.error('Delete error:', status, error);
+                }
+            });
         }
 
         /* ═══════════════════════════════════════════
@@ -363,8 +392,13 @@
         function toggleDropdown() { document.getElementById('userDropdown').classList.toggle('open'); }
         function goAccount() { window.location.href = 'admin_account.php'; }
         function logout() {
-            /* fetch('logout.php').then(() => window.location.href = 'index.html'); */
-            window.location.href = 'index.html';
+            $.ajax({
+                url: 'api/auth/logout.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function() { window.location.href = 'index.html'; },
+                error: function() { window.location.href = 'index.html'; }
+            });
         }
 
         /* ═══════════════════════════════════════════

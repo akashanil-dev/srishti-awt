@@ -1,17 +1,25 @@
 <?php
 
-include("../../../config/database.php");
-include("../../../app/helpers/response.php");
+include_once("../../../config/database.php");
+include_once("../../../app/helpers/response.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 $name = $data['name'];
 $email = $data['email'];
-$password = $data['password'];
+$password = password_hash($data['password'], PASSWORD_DEFAULT);
 $phone = $data['phone'];
+$branch = $data['branch'];
+$year = $data['year_of_passing'];
 
-$sql = "INSERT INTO users (name,email,password,phone)
-        VALUES ('$name','$email','$password','$phone')";
+$sql = "SELECT id FROM users WHERE email='$email'";
+$check = mysqli_query($conn, $sql);
+if(mysqli_num_rows($check) > 0){
+    sendResponse(false, [], "Email already registered");
+}
+
+$sql = "INSERT INTO users (name,email,password,phone,branch,year_of_passing)
+        VALUES ('$name','$email','$password','$phone','$branch','$year')";
 
 if(mysqli_query($conn,$sql)){
 

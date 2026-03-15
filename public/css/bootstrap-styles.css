@@ -152,3 +152,28 @@ nav.navbar {
         width: 100% !important; /* Full width button on phones */
     }
 }
+
+/*HOME PAGE CHANGES */
+/* Fix for desktop grid alignment */
+#eventsGrid {
+    margin-left: 0;
+    margin-right: 0;
+    width: 100%;
+}
+
+@media (min-width: 992px) {
+    .content-area {
+        padding-top: 20px;
+    }
+    
+    /* Ensure cards stay consistent with your original TechFest style */
+    .event-card {
+        min-height: 400px;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+
+
+

@@ -1,7 +1,9 @@
 <?php
 
-include("../../../config/database.php");
-include("../../../app/helpers/response.php");
+session_start();
+
+include_once("../../../config/database.php");
+include_once("../../../app/helpers/response.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
@@ -15,7 +17,15 @@ if(mysqli_num_rows($result) > 0){
 
     $user = mysqli_fetch_assoc($result);
 
-    if($user['password'] == $password){
+    // verify hashed password
+    if(password_verify($password, $user['password'])){
+
+        // create session
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['user_name'] = $user['name'];
+
+        // remove password from response
+        unset($user['password']);
 
         sendResponse(true,$user,"Login successful");
 

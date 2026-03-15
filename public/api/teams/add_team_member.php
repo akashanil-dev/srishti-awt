@@ -1,14 +1,15 @@
 <?php
 
-include("../../../config/database.php");
-include("../../../app/helpers/response.php");
+include_once("../../../config/database.php");
+include_once("../../../app/helpers/response.php");
+include_once("../../../app/middleware/auth.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 $team_id = $data['team_id'];
-$user_id = $data['user_id'];
+$member_user_id = $data['user_id'];
 
-if(empty($team_id) || empty($user_id)){
+if(empty($team_id) || empty($member_user_id)){
     sendResponse(false,[],"Team ID and User ID required");
 }
 
@@ -24,7 +25,7 @@ if(mysqli_num_rows($team_result) == 0){
 /* Check if user already in team */
 
 $check = "SELECT * FROM team_members 
-          WHERE team_id='$team_id' AND user_id='$user_id'";
+          WHERE team_id='$team_id' AND user_id='$member_user_id'";
 
 $check_result = mysqli_query($conn,$check);
 
@@ -35,7 +36,7 @@ if(mysqli_num_rows($check_result) > 0){
 /* Insert member */
 
 $sql = "INSERT INTO team_members (team_id,user_id)
-        VALUES ('$team_id','$user_id')";
+        VALUES ('$team_id','$member_user_id')";
 
 if(mysqli_query($conn,$sql)){
     sendResponse(true,[],"Team member added");
