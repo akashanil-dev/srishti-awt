@@ -81,3 +81,160 @@ function handleRegister(eventId) {
     openReg(eventId);
   }
 }
+
+
+/* ── AUTH MODAL OPEN / CLOSE ── */
+function openAuthModal(mode, fromRegister) {
+  document.getElementById('loginView').style.display = mode === 'login' ? 'block' : 'none';
+  document.getElementById('signupView').style.display = mode === 'signup' ? 'block' : 'none';
+  document.getElementById('authHint').classList.toggle('show', !!fromRegister);
+  document.getElementById('authOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeAuth() {
+  document.getElementById('authOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  clearFormErrors('loginEmail', 'loginPass', 'signupName', 'signupEmail', 'signupPhone', 'signupBranch', 'signupYear', 'signupPass');
+}
+function closeAuthOutside(e) { if (e.target === document.getElementById('authOverlay')) closeAuth(); }
+function switchToSignup() {
+  const hint = document.getElementById('authHint').classList.contains('show');
+  openAuthModal('signup', hint);
+}
+function switchToLogin() {
+  const hint = document.getElementById('authHint').classList.contains('show');
+  openAuthModal('login', hint);
+}
+
+/* ── LOGIN SUBMIT ── */
+document.getElementById('loginForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  let ok = true;
+  ok &= vf('loginEmail', 'loginEmailErr', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Please enter a valid email address.');
+  ok &= vf('loginPass', 'loginPassErr', v => v.length > 0, 'Password is required.');
+  if (!ok) return;
+
+  const btn = document.getElementById('loginBtn');
+  btn.disabled = true;
+  btn.textContent = 'Logging in…';
+
+  $.ajax({
+    url: 'api/auth/login.php',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      email: $('#loginEmail').val().trim(),
+      password: $('#loginPass').val()
+    }),
+    dataType: 'json',
+    success: function (response) {
+      btn.disabled = false;
+      btn.textContent = 'Log In →';
+      if (response.success) {
+        loginSuccess(response.data);
+      } else {
+        showFieldError('loginPassErr', response.message);
+      }
+    },
+    error: function () {
+      btn.disabled = false;
+      btn.textContent = 'Log In →';
+      showToast('Network error. Please try again.');
+    }
+  });
+});
+
+/* ── SIGNUP SUBMIT ── */
+document.getElementById('signupForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  let ok = true;
+  ok &= vf('signupName', 'signupNameErr', v => v.length >= 2, 'Please enter your full name.');
+  ok &= vf('signupEmail', 'signupEmailErr', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Please enter a valid email address.');
+  ok &= vf('signupPhone', 'signupPhoneErr', v => /^[\d\s\+\-]{7,15}$/.test(v), 'Please enter a valid phone number.');
+  ok &= vf('signupBranch', 'signupBranchErr', v => v !== '', 'Please select your branch.');
+  ok &= vf('signupYear', 'signupYearErr', v => v !== '', 'Please select your year of passing.');
+  ok &= vf('signupPass', 'signupPassErr', v => v.length >= 8, 'Password must be at least 8 characters.');
+  if (!ok) return;
+
+  const btn = document.getElementById('signupBtn');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+
+  $.ajax({
+    url: 'api/auth/signup.php',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      name: $('#signupName').val().trim(),
+      email: $('#signupEmail').val().trim(),
+      password: $('#signupPass').val(),
+      phone: $('#signupPhone').val().trim()
+    }),
+    dataType: 'json',
+    success: function (response) {
+      btn.disabled = false;
+      btn.textContent = 'Create Account →';
+      if (response.success) {
+        $.ajax({
+          url: 'api/auth/login.php',
+          type: 'POST',
+          contentType: 'application/json',
+          data: JSON.stringify({
+            email: $('#signupEmail').val().trim(),
+            password: $('#signupPass').val()
+          }),
+          dataType: 'json',
+          success: function (loginRes) {
+            if (loginRes.success) loginSuccess(loginRes.data);
+          }
+        });
+      } else {
+        showFieldError('signupEmailErr', response.message);
+      }
+    }
+  });
+
+});
+
+function loginSuccess(user) {
+  currentUser = user;
+  localStorage.setItem('currentUser', JSON.stringify(user));
+  closeAuth();
+  updateNav();
+  renderEvents('all');
+  showToast('👋 Welcome, ' + user.name + '!');
+  if (pendingEvent) {
+    const eid = pendingEvent; pendingEvent = null;
+    setTimeout(() => openReg(eid), 380);
+  }
+}
+
+function logout() {
+  currentUser = null;
+  $.ajax({
+    url: 'api/auth/logout.php',
+    type: 'GET',
+    contentType: 'application/json',
+    success: function (response) {
+      if (response.success) {
+        updateNav();
+        renderEvents('all');
+        showToast('You have been logged out.');
+      } else {
+        showToast('Issue Logging out.');
+      }
+    }
+  });
+}
+
+function updateNav() {
+  const guest = document.getElementById('navGuest');
+  const user = document.getElementById('navUser');
+  if (currentUser) {
+    guest.style.display = 'none';
+    user.classList.add('visible');
+    document.getElementById('navUserName').textContent = currentUser.name;
+  } else {
+    guest.style.display = 'flex';
+    user.classList.remove('visible');
+  }
+}
