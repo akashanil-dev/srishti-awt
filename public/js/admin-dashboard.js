@@ -25,6 +25,31 @@
         let tableSearch = '';
         let tableType = 'all';
         let tableStatus = 'all';
+        function loadEvents(callback) {
+            $.ajax({
+                url: 'api/events/get_events.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        events = response.data;
+                        // Track next available ID
+                        if (events.length > 0) {
+                            nextId = Math.max(...events.map(e => parseInt(e.id))) + 1;
+                        }
+                        renderTable();
+                        updateStats();
+                        if (typeof callback === 'function') callback();
+                    } else {
+                        showToast('error', 'Failed to load events: ' + (response.message || 'Unknown error'));
+                    }
+                },
+                error: function(xhr, status, error) {
+                    showToast('error', 'Network error loading events. Check your server.');
+                    console.error('Load events error:', status, error);
+                }
+            });
+        }
 
         /* ═══════════════════════════════════════════
            INIT
