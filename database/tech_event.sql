@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 14, 2026 at 05:59 PM
+-- Generation Time: Mar 15, 2026 at 11:54 AM
 -- Server version: 8.0.45
 -- PHP Version: 8.2.12
 
@@ -42,8 +42,7 @@ CREATE TABLE `events` (
 --
 
 INSERT INTO `events` (`id`, `title`, `description`, `event_date`, `max_participants`, `created_by`, `created_at`) VALUES
-(1, 'Hackathon', '24 hour coding event', '2026-04-10', 100, 1, '2026-03-12 12:28:41'),
-(2, 'Web Workshop', 'Learn modern web dev', '2026-04-15', 50, 1, '2026-03-12 12:28:41');
+(3, 'Robotics Competition', 'Robotics challenge', '2026-06-01', 80, 1, '2026-03-14 17:51:36');
 
 -- --------------------------------------------------------
 
@@ -57,15 +56,6 @@ CREATE TABLE `event_registrations` (
   `event_id` int NOT NULL,
   `registered_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `event_registrations`
---
-
-INSERT INTO `event_registrations` (`id`, `user_id`, `event_id`, `registered_at`) VALUES
-(1, 2, 1, '2026-03-12 12:28:41'),
-(2, 3, 1, '2026-03-12 12:28:41'),
-(3, 4, 2, '2026-03-12 12:28:41');
 
 -- --------------------------------------------------------
 
@@ -81,13 +71,6 @@ CREATE TABLE `teams` (
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
---
--- Dumping data for table `teams`
---
-
-INSERT INTO `teams` (`id`, `team_name`, `event_id`, `created_by`, `created_at`) VALUES
-(1, 'Alpha Coders', 1, 2, '2026-03-12 12:28:41');
-
 -- --------------------------------------------------------
 
 --
@@ -99,14 +82,6 @@ CREATE TABLE `team_members` (
   `team_id` int DEFAULT NULL,
   `user_id` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `team_members`
---
-
-INSERT INTO `team_members` (`id`, `team_id`, `user_id`) VALUES
-(1, 1, 2),
-(2, 1, 3);
 
 -- --------------------------------------------------------
 
@@ -121,21 +96,26 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `role` enum('user','admin') DEFAULT 'user',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  `phone` varchar(15) NOT NULL
+  `phone` varchar(15) NOT NULL,
+  `branch` varchar(50) DEFAULT NULL,
+  `year_of_passing` int DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`, `phone`) VALUES
-(1, 'Admin', 'admin@test.com', '123456', 'admin', '2026-03-12 12:28:41', '9876543210'),
-(2, 'John', 'john@test.com', '123456', 'user', '2026-03-12 12:28:41', '9123456780'),
-(3, 'Alice', 'alice@test.com', '123456', 'user', '2026-03-12 12:28:41', '9988776655'),
-(4, 'David', 'david@test.com', '123456', 'user', '2026-03-12 12:28:41', '9012345678'),
-(5, 'Mike', 'mike@test.com', '123456', 'user', '2026-03-12 12:42:20', '9898989898'),
-(7, 'Rahul', 'rahul@test.com', '123456', 'user', '2026-03-12 12:48:37', '9078563412'),
-(8, 'Arjun', 'arjun@test.com', '123456', 'user', '2026-03-14 14:31:47', '9982345671');
+INSERT INTO `users` (`id`, `name`, `email`, `password`, `role`, `created_at`, `phone`, `branch`, `year_of_passing`) VALUES
+(1, 'Admin', 'admin@test.com', '123456', 'admin', '2026-03-12 12:28:41', '9876543210', NULL, NULL),
+(2, 'John', 'john@test.com', '123456', 'user', '2026-03-12 12:28:41', '9123456780', NULL, NULL),
+(3, 'Alice', 'alice@test.com', '123456', 'user', '2026-03-12 12:28:41', '9988776655', 'CSE', 2026),
+(4, 'David', 'david@test.com', '123456', 'user', '2026-03-12 12:28:41', '9012345678', 'ECE', 2025),
+(5, 'Mike', 'mike@test.com', '123456', 'user', '2026-03-12 12:42:20', '9898989898', 'IT', 2026),
+(7, 'Rahul', 'rahul@test.com', '123456', 'user', '2026-03-12 12:48:37', '9078563412', NULL, NULL),
+(8, 'Arjun', 'arjun@test.com', '123456', 'user', '2026-03-14 14:31:47', '9982345671', NULL, NULL),
+(11, 'John Doe', 'john@example.com', '123456', 'user', '2026-03-14 18:45:35', '9876543210', NULL, NULL),
+(12, 'Alex Johnson', 'alex@test.com', '$2y$10$QqQysQU9OVu/NH/M7F9couE9.D20QLE7b8nNfnt2oNre0lywS8eT6', 'user', '2026-03-15 10:10:44', '9876543210', 'Computer Science', 2026),
+(14, 'John Doe', 'johndoe@test.com', '$2y$10$VzH9DZWrvRFpJLjdwcIBM.PdFXEIQuD0Bh6/BDKz56jlyk56.3ip2', 'user', '2026-03-15 10:52:32', '9876543210', 'Computer Science', 2026);
 
 --
 -- Indexes for dumped tables
@@ -194,25 +174,25 @@ ALTER TABLE `events`
 -- AUTO_INCREMENT for table `event_registrations`
 --
 ALTER TABLE `event_registrations`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `teams`
 --
 ALTER TABLE `teams`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `team_members`
 --
 ALTER TABLE `team_members`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- Constraints for dumped tables
