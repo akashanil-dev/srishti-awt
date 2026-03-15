@@ -140,6 +140,29 @@
 </div>
 
     <!-- ══════════════════════════════════
+         MY REGISTRATIONS
+    ══════════════════════════════════ -->
+    <div class="content-area container-fluid px-0 px-md-5 mt-4 mb-4">
+        <div class="toolbar d-flex justify-content-between align-items-center mb-3">
+            <div class="toolbar-left d-flex align-items-center">
+                <span class="toolbar-title h4 mb-0" style="font-family: 'Syne', sans-serif;">My Registrations</span>
+                <span class="event-count-badge badge rounded-pill bg-success bg-opacity-10 text-success ms-2" id="myRegCount">0</span>
+            </div>
+            <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="toggleMyRegs()">
+                <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" fill="none" stroke="currentColor">
+                    <polyline points="6 9 12 15 18 9"/>
+                </svg>
+                Toggle
+            </button>
+        </div>
+        <div id="myRegsContainer" style="display:none;">
+            <div id="myRegsList" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                <div class="text-center" style="color:var(--gray); grid-column:1/-1; padding:32px 0;">Loading your registrations…</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════════════════════════════════
          EVENT DETAIL MODAL
     ══════════════════════════════════ -->
     <div class="modal-overlay" id="detailOverlay" onclick="closeDetailOutside(event)">
@@ -223,6 +246,13 @@
                             <polyline points="20 6 9 17 4 12" />
                         </svg>
                         Register for this Event
+                    </button>
+                    <button class="btn-modal-close" onclick="closeDetail(); openTeamModal();" style="background:rgba(99,102,241,0.12);color:#818cf8;border:1px solid rgba(99,102,241,0.25);">
+                        <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" fill="none" stroke="currentColor">
+                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                        </svg>
+                        Create Team
                     </button>
                     <button class="btn-modal-close" onclick="closeDetail()">Close</button>
                 </div>
@@ -331,6 +361,64 @@
     </div>
 
 
+    <!-- ══════════════════════════════════
+         TEAM MANAGEMENT MODAL
+    ══════════════════════════════════ -->
+    <div class="modal-overlay" id="teamOverlay" onclick="closeTeamOutside(event)">
+        <div class="modal-box">
+            <div class="modal-stripe"></div>
+            <div class="modal-inner">
+                <div class="modal-top">
+                    <div class="modal-title-block">
+                        <div class="modal-event-title">Team Management</div>
+                        <div style="color:var(--gray);font-size:0.85rem;margin-top:4px">Create a team or add members for your event.</div>
+                    </div>
+                    <button class="modal-close-btn" onclick="closeTeam()">
+                        <svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                    </button>
+                </div>
+
+                <!-- Create Team Form -->
+                <div id="teamCreateSection">
+                    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">Create a Team</div>
+                    <form id="teamCreateForm" style="display:flex;flex-direction:column;gap:12px;">
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--gray);margin-bottom:4px;display:block;">Team Name</label>
+                            <input type="text" id="teamName" class="form-control bg-dark text-white border-secondary" placeholder="Enter team name" required style="border-radius:8px;">
+                        </div>
+                        <div>
+                            <label style="font-size:0.8rem;color:var(--gray);margin-bottom:4px;display:block;">Event</label>
+                            <select id="teamEventSelect" class="form-select bg-dark text-white border-secondary" required style="border-radius:8px;">
+                                <option value="">— Select event —</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn-modal-register" id="teamCreateBtn">
+                            <svg viewBox="0 0 24 24" stroke-width="2.5" width="16" height="16" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                            Create Team
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Add Member Form (shown after team is created) -->
+                <div id="teamMemberSection" style="display:none;margin-top:20px;">
+                    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">Add Team Member</div>
+                    <div style="margin-bottom:8px;padding:10px;background:rgba(61,218,110,0.08);border-radius:8px;border:1px solid rgba(61,218,110,0.2);">
+                        <span style="color:var(--green);font-weight:600;" id="teamCreatedName">—</span>
+                        <span style="color:var(--gray);font-size:0.8rem;"> (ID: <span id="teamCreatedId">—</span>)</span>
+                    </div>
+                    <form id="teamMemberForm" style="display:flex;gap:8px;">
+                        <input type="number" id="memberUserId" class="form-control bg-dark text-white border-secondary" placeholder="User ID" required style="border-radius:8px;flex:1;">
+                        <button type="submit" class="btn-modal-register" style="white-space:nowrap;" id="addMemberBtn">Add Member</button>
+                    </form>
+                    <div id="teamMemberMsg" style="margin-top:8px;font-size:0.85rem;"></div>
+                </div>
+
+                <button class="btn-modal-close" onclick="closeTeam()" style="margin-top:16px;">Close</button>
+            </div>
+        </div>
+    </div>
+
+
     <!-- TOAST -->
     <div class="toast-wrap">
         <div class="toast" id="toast">
@@ -342,6 +430,7 @@
     </div>
 
 
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="js/home.js"></script>
 </body>
 

@@ -1,7 +1,7 @@
 <?php
 
-include("../config/db.php");
-include("../config/response.php");
+include("../../../config/database.php");
+include("../../../app/helpers/response.php");
 include("../../../app/middleware/auth.php");
 
 

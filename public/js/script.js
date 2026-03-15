@@ -1,8 +1,25 @@
 /* ── STATE ── */
 let currentUser = null;
 let pendingEvent = null;
-
 let events = [];
+
+/* ── INIT: load events + restore session ── */
+$(document).ready(function() {
+    // Check if already logged in — redirect to home
+    $.ajax({
+        url: 'api/auth/check_session.php',
+        type: 'GET',
+        dataType: 'json',
+        success: function(response) {
+            if (response.success) {
+                // Already logged in, go to home
+                window.location.href = 'home.html';
+                return;
+            }
+        }
+    });
+    loadEvents();
+});
 
 function loadEvents() {
     $.ajax({
@@ -21,18 +38,18 @@ function loadEvents() {
     });
 }
 
-$(document).ready(function() {
-    loadEvents();
-});
-
-
+/* ── RENDER EVENTS ── */
 function renderEvents(filter) {
-  console.log("Rendering Events:", events);
   const grid = document.getElementById('eventsGrid');
-    const list = (filter === 'all') ? events : events.filter(e => e.cat === filter);
+  const list = (filter === 'all') ? events : events.filter(e => e.cat === filter);
   
+  if (!list.length) {
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--gray);">No events found.</div>';
+    return;
+  }
+
   grid.innerHTML = list.map(e => {
-    const seats = parseInt(e.seats) || 0;
+    const seats = parseInt(e.max_participants) || 0;
     const registered = parseInt(e.registered) || 0;
     const pct = seats > 0 ? Math.round((registered / seats) * 100) : 0;
     const left = Math.max(0, seats - registered); 
@@ -43,6 +60,13 @@ function renderEvents(filter) {
     
     const btnLabel = full ? 'Fully Booked' : currentUser ? 'Register →' : '🔒 Login to Register';
     const btnClass = full ? '' : currentUser ? '' : 'guest';
+
+    // Format the date nicely
+    let dateStr = 'TBA';
+    if (e.event_date) {
+        const d = new Date(e.event_date + 'T00:00:00');
+        dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
     
     return `
       <div class="event-card">
@@ -51,9 +75,8 @@ function renderEvents(filter) {
         <div class="event-desc">${e.description || 'No description available.'}</div>
         
         <div class="event-meta">
-          <div class="event-meta-item"><svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${e.date || 'TBA'}</div>
-          <div class="event-meta-item"><svg viewBox="0 0 24 24" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>${e.time || 'TBA'}</div>
-          <div class="event-meta-item"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>${e.venue || 'TBA'}</div>
+          <div class="event-meta-item"><svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${dateStr}</div>
+          <div class="event-meta-item"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${seats} seats</div>
         </div>
         
         <div class="event-seats">
@@ -167,13 +190,16 @@ document.getElementById('signupForm').addEventListener('submit', function (e) {
       name: $('#signupName').val().trim(),
       email: $('#signupEmail').val().trim(),
       password: $('#signupPass').val(),
-      phone: $('#signupPhone').val().trim()
+      phone: $('#signupPhone').val().trim(),
+      branch: $('#signupBranch').val(),
+      year_of_passing: $('#signupYear').val()
     }),
     dataType: 'json',
     success: function (response) {
       btn.disabled = false;
       btn.textContent = 'Create Account →';
       if (response.success) {
+        // Auto-login after signup
         $.ajax({
           url: 'api/auth/login.php',
           type: 'POST',
@@ -190,6 +216,11 @@ document.getElementById('signupForm').addEventListener('submit', function (e) {
       } else {
         showFieldError('signupEmailErr', response.message);
       }
+    },
+    error: function () {
+      btn.disabled = false;
+      btn.textContent = 'Create Account →';
+      showToast('Network error. Please try again.');
     }
   });
 
@@ -199,29 +230,26 @@ function loginSuccess(user) {
   currentUser = user;
   localStorage.setItem('currentUser', JSON.stringify(user));
   closeAuth();
-  updateNav();
-  renderEvents('all');
   showToast('👋 Welcome, ' + user.name + '!');
-  if (pendingEvent) {
-    const eid = pendingEvent; pendingEvent = null;
-    setTimeout(() => openReg(eid), 380);
-  }
+  // Redirect to home dashboard
+  setTimeout(() => { window.location.href = 'home.html'; }, 500);
 }
 
 function logout() {
   currentUser = null;
+  localStorage.removeItem('currentUser');
   $.ajax({
     url: 'api/auth/logout.php',
     type: 'GET',
-    contentType: 'application/json',
+    dataType: 'json',
     success: function (response) {
-      if (response.success) {
-        updateNav();
-        renderEvents('all');
-        showToast('You have been logged out.');
-      } else {
-        showToast('Issue Logging out.');
-      }
+      updateNav();
+      renderEvents('all');
+      showToast('You have been logged out.');
+    },
+    error: function() {
+      updateNav();
+      renderEvents('all');
     }
   });
 }
@@ -238,6 +266,7 @@ function updateNav() {
     user.classList.remove('visible');
   }
 }
+
 /* ── REGISTRATION MODAL ── */
 function openReg(eventId) {
   populateEventSelect();
@@ -260,8 +289,11 @@ function closeRegOutside(e) { if (e.target === document.getElementById('regOverl
 function populateEventSelect() {
   const sel = document.getElementById('selectedEvent');
   sel.innerHTML = '<option value="">— Choose an event —</option>' +
-    events.filter(e => e.seats - e.registered > 0)
-      .map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+    events.filter(e => {
+      const maxP = parseInt(e.max_participants) || 0;
+      const reg = parseInt(e.registered) || 0;
+      return maxP - reg > 0;
+    }).map(e => `<option value="${e.id}">${e.title}</option>`).join('');
 }
 
 document.getElementById('registrationForm').addEventListener('submit', function (e) {
@@ -276,33 +308,32 @@ document.getElementById('registrationForm').addEventListener('submit', function 
   const btn = document.getElementById('submitBtn');
   btn.disabled = true; btn.textContent = 'Submitting…';
 
-  const fd = new FormData();
-  fd.append('name', document.getElementById('studentName').value.trim());
-  fd.append('email', document.getElementById('studentEmail').value.trim());
-  fd.append('phone', document.getElementById('studentPhone').value.trim());
-  fd.append('event_id', document.getElementById('selectedEvent').value);
-
   $.ajax({
-        url: 'api/events/register_event.php',
-        type: 'POST',
-        contentType: 'application/json',
-        data: JSON.stringify({
-            user_id: currentUser.id,
-            event_id: $('#selectedEvent').val()
-        }),
-        dataType: 'json',
-        success: function(response) {
-            closeReg();
-            btn.disabled = false;
-            btn.textContent = 'Complete Registration →';
-            showToast(response.success ? '✅ ' + response.message : '⚠️ ' + response.message);
-            if (response.success) loadEvents(); // Refresh seat counts
-        }
-    });
+    url: 'api/events/register_event.php',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      event_id: $('#selectedEvent').val()
+    }),
+    dataType: 'json',
+    success: function(response) {
+      closeReg();
+      btn.disabled = false;
+      btn.textContent = 'Complete Registration →';
+      showToast(response.success ? '✅ ' + response.message : '⚠️ ' + response.message);
+      if (response.success) loadEvents(); // Refresh seat counts
+    },
+    error: function() {
+      btn.disabled = false;
+      btn.textContent = 'Complete Registration →';
+      showToast('❌ Network error. Please try again.');
+    }
+  });
 });
 
 function loadParticipants() {
   const list = document.getElementById('participantsList');
+  if (!list) return;
   list.innerHTML = `<div class="table-row"><span style="grid-column:1/-1;text-align:center;color:var(--gray)">Loading…</span></div>`;
 
   $.ajax({
@@ -316,8 +347,6 @@ function loadParticipants() {
                   <div class="table-row">
                     <span class="participant-name">${p.name}</span>
                     <span style="color:var(--gray);font-size:0.85rem">${p.email}</span>
-                    <span><span class="event-badge">${p.event}</span></span>
-                    <span><span class="status-badge status-${p.status}">${p.status}</span></span>
                   </div>`).join('');
           }
       }
@@ -330,15 +359,34 @@ function vf(id, errId, check, msg) {
   const el = document.getElementById(id);
   const err = document.getElementById(errId);
   if (!check(val)) {
-    el.classList.add('error'); err.textContent = msg; err.classList.add('show'); return false;
+    el.classList.add('error');
+    err.textContent = msg;
+    err.classList.add('show');
+    err.classList.remove('d-none');
+    return false;
   }
-  el.classList.remove('error'); err.classList.remove('show'); return true;
+  el.classList.remove('error');
+  err.classList.remove('show');
+  err.classList.add('d-none');
+  return true;
 }
+
+function showFieldError(errId, msg) {
+  const err = document.getElementById(errId);
+  if (err) {
+    err.textContent = msg;
+    err.classList.add('show');
+    err.classList.remove('d-none');
+  }
+}
+
 function clearFormErrors(...ids) {
   ids.forEach(id => {
     const el = document.getElementById(id); if (el) el.classList.remove('error');
   });
-  document.querySelectorAll('.form-error').forEach(e => e.classList.remove('show'));
+  document.querySelectorAll('.form-error, .form-text').forEach(e => {
+    e.classList.remove('show');
+  });
 }
 function togglePass(inputId, btn) {
   const inp = document.getElementById(inputId);
@@ -357,4 +405,3 @@ const obs = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
 }, { threshold: 0.12 });
 document.querySelectorAll('.fade-up').forEach(el => obs.observe(el));
-

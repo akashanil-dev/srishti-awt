@@ -2,7 +2,7 @@
 
 $host = "localhost";
 $user = "root";
-$password = "";
+$password = "2208";
 $database = "tech_event";
 
 $conn = mysqli_connect($host,$user,$password,$database);

@@ -1,27 +1,8 @@
         /* ═══════════════════════════════════════════
-           SIMULATED USER SESSION
-           In production: read from PHP session → echo json_encode($_SESSION['user'])
+           USER SESSION — loaded from backend
         ═══════════════════════════════════════════ */
-        const currentUser = {
-            name: 'Alex Johnson',
-            email: 'alex@college.edu',
-            phone: '+91 9876543210'
-        };
-
-        /* ═══════════════════════════════════════════
-           EVENT DATA
-           In production:
-             fetch('get_events.php').then(r=>r.json()).then(data=>{ events=data; updateStats(); renderCards(); });
-        ═══════════════════════════════════════════ */
-        let events = [
-            { id: 1, title: 'AI & Machine Learning Workshop', cat: 'workshop', description: 'Hands-on session covering neural networks, model training, and real-world applications using Python and TensorFlow. Suitable for beginners and intermediate learners.', event_date: '2026-03-15', max_participants: 50, registered: 18 },
-            { id: 2, title: 'Full-Stack Dev Hackathon', cat: 'hackathon', description: '48-hour coding marathon. Build a complete web application from scratch. Cash prizes for top 3 teams. Participate solo or as a team of up to 4 members.', event_date: '2026-03-16', max_participants: 40, registered: 32 },
-            { id: 3, title: 'Cybersecurity CTF Challenge', cat: 'competition', description: 'Capture-the-Flag cybersecurity competition. Solve progressively harder real-world security puzzles across web exploitation, cryptography, and reverse engineering.', event_date: '2026-03-18', max_participants: 60, registered: 18 },
-            { id: 4, title: 'Cloud Computing Seminar', cat: 'seminar', description: 'Industry experts from AWS and Google Cloud walk through modern cloud architecture, DevOps pipelines, container orchestration, and serverless deployment strategies.', event_date: '2026-03-15', max_participants: 80, registered: 45 },
-            { id: 5, title: 'UI/UX Design Sprint', cat: 'workshop', description: '2-day intensive workshop covering wireframing fundamentals, Figma prototyping, design systems, and user testing techniques with real participants.', event_date: '2026-03-16', max_participants: 30, registered: 30 },
-            { id: 6, title: 'Blockchain & Web3 Talk', cat: 'seminar', description: 'Deep dive into decentralised applications, smart contract development with Solidity, NFT standards, and the evolving landscape of Web3 with seasoned developers.', event_date: '2026-03-18', max_participants: 100, registered: 55 },
-        ];
-
+        let currentUser = null;
+        let events = [];
         let activeFilter = 'all';
         let activeSearch = '';
         let activeSort = 'date';
@@ -32,6 +13,34 @@
            INIT
         ═══════════════════════════════════════════ */
         document.addEventListener('DOMContentLoaded', () => {
+            // Check if user is logged in
+            $.ajax({
+                url: 'api/auth/check_session.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        currentUser = response.data;
+                        setupUserUI();
+                        loadEvents();
+                        loadMyRegistrations();
+                    } else {
+                        // Not logged in — redirect to login page
+                        window.location.href = 'index.html';
+                    }
+                },
+                error: function() {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            document.addEventListener('click', e => {
+                if (!document.getElementById('userDropdown').contains(e.target))
+                    document.getElementById('userDropdown').classList.remove('open');
+            });
+        });
+
+        function setupUserUI() {
             const initials = currentUser.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
             document.getElementById('avatarInitials').textContent = initials;
             document.getElementById('topbarUserName').textContent = currentUser.name;
@@ -41,16 +50,87 @@
             document.getElementById('confirmAvatar').textContent = initials;
             document.getElementById('confirmUserName').textContent = currentUser.name;
             document.getElementById('confirmUserEmail').textContent = currentUser.email;
+        }
 
-            updateStats();
-            renderCards();
-            initSlider();
-
-            document.addEventListener('click', e => {
-                if (!document.getElementById('userDropdown').contains(e.target))
-                    document.getElementById('userDropdown').classList.remove('open');
+        /* ═══════════════════════════════════════════
+           LOAD EVENTS FROM API
+        ═══════════════════════════════════════════ */
+        function loadEvents() {
+            $.ajax({
+                url: 'api/events/get_events.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        events = response.data;
+                        updateStats();
+                        renderCards();
+                        initSlider();
+                    } else {
+                        showToast('⚠️ Failed to load events.');
+                    }
+                },
+                error: function() {
+                    showToast('❌ Network error loading events.');
+                }
             });
-        });
+        }
+
+        /* ═══════════════════════════════════════════
+           LOAD MY REGISTRATIONS COUNT
+        ═══════════════════════════════════════════ */
+        function loadMyRegistrations() {
+            $.ajax({
+                url: 'api/user/get_user_events.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        const myEvents = response.data;
+                        myRegistrations = myEvents.length;
+                        document.getElementById('statRegistered').textContent = myRegistrations;
+                        document.getElementById('myRegCount').textContent = myRegistrations;
+                        renderMyRegistrations(myEvents);
+                    }
+                }
+            });
+        }
+
+        function renderMyRegistrations(myEvents) {
+            const list = document.getElementById('myRegsList');
+            if (!myEvents.length) {
+                list.innerHTML = `<div class="col-12 text-center" style="color:var(--gray); padding:32px 0;">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5" width="40" height="40" fill="none" stroke="currentColor" style="margin-bottom:12px;opacity:0.4">
+                        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                    <p>You haven't registered for any events yet.</p>
+                </div>`;
+                return;
+            }
+            list.innerHTML = myEvents.map(e => `
+                <div class="col">
+                    <div class="event-card" style="cursor:default;">
+                        <div class="ec-title">${e.title || 'Event'}</div>
+                        <div class="ec-desc">${e.description || ''}</div>
+                        <div class="ec-meta">
+                            <div class="ec-meta-row">
+                                <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                ${formatDate(e.event_date)}
+                            </div>
+                        </div>
+                        <div style="margin-top:auto;padding-top:12px;">
+                            <span class="ec-badge badge-open" style="font-size:0.75rem;">✅ Registered</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        let myRegsVisible = false;
+        function toggleMyRegs() {
+            myRegsVisible = !myRegsVisible;
+            document.getElementById('myRegsContainer').style.display = myRegsVisible ? 'block' : 'none';
+        }
 
         /* ═══════════════════════════════════════════
            RENDER CARDS
@@ -61,11 +141,11 @@
             if (activeFilter !== 'all') list = list.filter(e => e.cat === activeFilter);
             if (activeSearch.trim()) {
                 const q = activeSearch.toLowerCase();
-                list = list.filter(e => e.title.toLowerCase().includes(q) || e.description.toLowerCase().includes(q));
+                list = list.filter(e => (e.title || '').toLowerCase().includes(q) || (e.description || '').toLowerCase().includes(q));
             }
             if (activeSort === 'date') list.sort((a, b) => new Date(a.event_date) - new Date(b.event_date));
-            if (activeSort === 'seats') list.sort((a, b) => (a.max_participants - a.registered) - (b.max_participants - b.registered));
-            if (activeSort === 'title') list.sort((a, b) => a.title.localeCompare(b.title));
+            if (activeSort === 'seats') list.sort((a, b) => (parseInt(a.available_seats) || 0) - (parseInt(b.available_seats) || 0));
+            if (activeSort === 'title') list.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
 
             document.getElementById('visibleCount').textContent = list.length + ' event' + (list.length !== 1 ? 's' : '');
 
@@ -77,9 +157,11 @@
         }
 
         function buildCard(e) {
-            const left = e.max_participants - e.registered;
-            const pct = Math.round((e.registered / e.max_participants) * 100);
-            const full = left <= 0;
+            const maxP = parseInt(e.max_participants) || 0;
+            const reg = parseInt(e.registered) || 0;
+            const left = Math.max(0, maxP - reg);
+            const pct = maxP > 0 ? Math.round((reg / maxP) * 100) : 0;
+            const full = left <= 0 && maxP > 0;
             const warn = pct >= 70 && !full;
             const fillCl = full ? 'fill-red' : warn ? 'fill-amber' : 'fill-green';
             const leftC = full ? 'var(--red)' : warn ? 'var(--amber)' : 'var(--green)';
@@ -100,8 +182,8 @@
             <div class="ec-icon"><svg viewBox="0 0 24 24" stroke-width="1.8">${icon}</svg></div>
             <div class="ec-badges">${badgeHtml}</div>
           </div>
-          <div class="ec-title">${e.title}</div>
-          <div class="ec-desc">${e.description}</div>
+          <div class="ec-title">${e.title || 'Untitled Event'}</div>
+          <div class="ec-desc">${e.description || 'No description available.'}</div>
           <div class="ec-meta">
             <div class="ec-meta-row">
               <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
@@ -109,7 +191,7 @@
             </div>
             <div class="ec-meta-row">
               <svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-              Max ${e.max_participants} participants
+              Max ${maxP} participants
             </div>
           </div>
           <div class="ec-seats">
@@ -132,20 +214,22 @@
            DETAIL MODAL
         ═══════════════════════════════════════════ */
         function openDetail(id) {
-            const e = events.find(ev => ev.id === id);
+            const e = events.find(ev => parseInt(ev.id) === parseInt(id));
             if (!e) return;
             currentDetailEvent = e;
 
-            const left = e.max_participants - e.registered;
-            const pct = Math.round((e.registered / e.max_participants) * 100);
-            const full = left <= 0;
+            const maxP = parseInt(e.max_participants) || 0;
+            const reg = parseInt(e.registered) || 0;
+            const left = Math.max(0, maxP - reg);
+            const pct = maxP > 0 ? Math.round((reg / maxP) * 100) : 0;
+            const full = left <= 0 && maxP > 0;
             const warn = pct >= 70 && !full;
 
             document.getElementById('detailTitle').textContent = e.title;
             document.getElementById('detailDesc').textContent = e.description;
             document.getElementById('detailDate').textContent = formatDate(e.event_date);
-            document.getElementById('detailMax').textContent = e.max_participants + ' participants';
-            document.getElementById('detailRegistered').textContent = e.registered + ' registered';
+            document.getElementById('detailMax').textContent = maxP + ' participants';
+            document.getElementById('detailRegistered').textContent = reg + ' registered';
             document.getElementById('detailLeft').textContent = full ? 'Fully Booked' : left + ' seats left';
             document.getElementById('detailLeft').style.color = full ? 'var(--red)' : warn ? 'var(--amber)' : 'var(--green)';
 
@@ -187,7 +271,9 @@
             if (!e) return;
             closeDetail();
 
-            const left = e.max_participants - e.registered;
+            const maxP = parseInt(e.max_participants) || 0;
+            const reg = parseInt(e.registered) || 0;
+            const left = Math.max(0, maxP - reg);
 
             document.getElementById('confirmEventTitle').textContent = e.title;
             document.getElementById('confirmEventDate').textContent = formatDate(e.event_date);
@@ -227,7 +313,7 @@
             function getThumbX() {
                 const trackW = track.getBoundingClientRect().width;
                 const thumbW = thumb.getBoundingClientRect().width;
-                return trackW - thumbW - 4; // 4px = right padding
+                return trackW - thumbW - 4;
             }
 
             function onPointerDown(e) {
@@ -247,15 +333,12 @@
                 let newX = Math.min(Math.max(currentX + delta, 4), maxTravel);
                 thumb.style.left = newX + 'px';
 
-                // Fill progress
                 const pct = ((newX - 4) / (maxTravel - 4)) * 100;
                 fill.style.width = Math.min(pct + 5, 100) + '%';
 
-                // Dim arrows as user drags
                 document.getElementById('sliderArrows').style.opacity = Math.max(0.3 - pct / 100, 0);
                 document.getElementById('sliderText').style.opacity = Math.max(1 - pct / 60, 0);
 
-                // Trigger if past 90%
                 if (pct >= 90 && !confirmed) triggerConfirm(newX);
             }
 
@@ -264,7 +347,6 @@
                 dragging = false;
                 thumb.classList.remove('dragging');
                 if (!confirmed) {
-                    // Snap back
                     thumb.style.transition = 'left 0.4s cubic-bezier(0.34,1.56,0.64,1)';
                     thumb.style.left = '4px';
                     fill.style.transition = 'width 0.4s ease';
@@ -284,7 +366,6 @@
                 fill.style.width = '100%';
                 track.classList.add('success');
 
-                // Change icon to checkmark
                 thumb.querySelector('svg').innerHTML = '<polyline points="20 6 9 17 4 12" stroke-width="2.5"/>';
 
                 document.getElementById('sliderLabel').textContent = 'Confirmed! Processing your registration…';
@@ -325,39 +406,37 @@
         }
 
         /* ═══════════════════════════════════════════
-           SUBMIT REGISTRATION
+           SUBMIT REGISTRATION — REAL API CALL
         ═══════════════════════════════════════════ */
         function submitRegistration() {
             const e = currentDetailEvent;
-            const fd = new FormData();
-            fd.append('event_id', e.id);
-            fd.append('user_id', 1); // from session in production
 
-            /* ─── REPLACE WITH ────────────────────────────────────────────────────
-               fetch('register.php', { method:'POST', body: fd })
-                 .then(r => r.json())
-                 .then(data => {
-                   if (data.success) {
-                     e.registered++;
-                     myRegistrations++;
-                     closeConfirm();
-                     updateStats();
-                     renderCards();
-                     showToast('Registered for ' + e.title + '!');
-                   } else {
-                     resetSlider();
-                     showToast('⚠️ ' + data.message);
-                   }
-                 });
-            ─────────────────────────────────────────────────────────────────── */
-            setTimeout(() => {
-                e.registered++;
-                myRegistrations++;
-                closeConfirm();
-                updateStats();
-                renderCards();
-                showToast('Registered for ' + e.title + '!');
-            }, 1400);
+            $.ajax({
+                url: 'api/events/register_event.php',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    event_id: e.id
+                }),
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        myRegistrations++;
+                        closeConfirm();
+                        loadEvents(); // Refresh seat counts from server
+                        loadMyRegistrations(); // Refresh My Registrations list
+                        document.getElementById('statRegistered').textContent = myRegistrations;
+                        showToast('✅ Registered for ' + e.title + '!');
+                    } else {
+                        resetSlider();
+                        showToast('⚠️ ' + response.message);
+                    }
+                },
+                error: function() {
+                    resetSlider();
+                    showToast('❌ Network error. Please try again.');
+                }
+            });
         }
 
         /* ═══════════════════════════════════════════
@@ -382,7 +461,11 @@
            STATS
         ═══════════════════════════════════════════ */
         function updateStats() {
-            const openCount = events.filter(e => e.max_participants - e.registered > 0).length;
+            const openCount = events.filter(e => {
+                const maxP = parseInt(e.max_participants) || 0;
+                const reg = parseInt(e.registered) || 0;
+                return maxP - reg > 0;
+            }).length;
             document.getElementById('statTotal').textContent = events.length;
             document.getElementById('statOpen').textContent = openCount;
             document.getElementById('statRegistered').textContent = myRegistrations;
@@ -394,8 +477,17 @@
         function toggleDropdown() { document.getElementById('userDropdown').classList.toggle('open'); }
         function goToAccount() { window.location.href = 'account.php'; }
         function logout() {
-            /* fetch('logout.php').then(() => { window.location.href = 'index.html'; }); */
-            window.location.href = 'index.html';
+            $.ajax({
+                url: 'api/auth/logout.php',
+                type: 'GET',
+                dataType: 'json',
+                success: function() {
+                    window.location.href = 'index.html';
+                },
+                error: function() {
+                    window.location.href = 'index.html';
+                }
+            });
         }
 
         /* ═══════════════════════════════════════════
@@ -412,3 +504,111 @@
             const d = new Date(dateStr + 'T00:00:00');
             return d.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' });
         }
+
+        /* ═══════════════════════════════════════════
+           TEAM MANAGEMENT
+        ═══════════════════════════════════════════ */
+        let currentTeamId = null;
+
+        function openTeamModal() {
+            // Populate event select
+            const sel = document.getElementById('teamEventSelect');
+            sel.innerHTML = '<option value="">— Select event —</option>' +
+                events.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+
+            // If opened from a detail view, pre-select event
+            if (currentDetailEvent) {
+                sel.value = currentDetailEvent.id;
+            }
+
+            // Reset state
+            currentTeamId = null;
+            document.getElementById('teamCreateSection').style.display = 'block';
+            document.getElementById('teamMemberSection').style.display = 'none';
+            document.getElementById('teamName').value = '';
+            document.getElementById('teamMemberMsg').innerHTML = '';
+
+            document.getElementById('teamOverlay').classList.add('open');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTeam() {
+            document.getElementById('teamOverlay').classList.remove('open');
+            document.body.style.overflow = '';
+        }
+        function closeTeamOutside(e) {
+            if (e.target === document.getElementById('teamOverlay')) closeTeam();
+        }
+
+        // Create Team
+        document.getElementById('teamCreateForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('teamCreateBtn');
+            btn.disabled = true;
+            btn.textContent = 'Creating…';
+
+            $.ajax({
+                url: 'api/teams/create_team.php',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    team_name: document.getElementById('teamName').value.trim(),
+                    event_id: document.getElementById('teamEventSelect').value
+                }),
+                dataType: 'json',
+                success: function(response) {
+                    btn.disabled = false;
+                    btn.textContent = 'Create Team';
+                    if (response.success) {
+                        currentTeamId = response.data.team_id;
+                        document.getElementById('teamCreatedName').textContent = document.getElementById('teamName').value.trim();
+                        document.getElementById('teamCreatedId').textContent = currentTeamId;
+                        document.getElementById('teamCreateSection').style.display = 'none';
+                        document.getElementById('teamMemberSection').style.display = 'block';
+                        showToast('✅ ' + response.message);
+                    } else {
+                        showToast('⚠️ ' + response.message);
+                    }
+                },
+                error: function() {
+                    btn.disabled = false;
+                    btn.textContent = 'Create Team';
+                    showToast('❌ Network error creating team.');
+                }
+            });
+        });
+
+        // Add Team Member
+        document.getElementById('teamMemberForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('addMemberBtn');
+            btn.disabled = true;
+            btn.textContent = 'Adding…';
+
+            $.ajax({
+                url: 'api/teams/add_team_member.php',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify({
+                    team_id: currentTeamId,
+                    user_id: parseInt(document.getElementById('memberUserId').value)
+                }),
+                dataType: 'json',
+                success: function(response) {
+                    btn.disabled = false;
+                    btn.textContent = 'Add Member';
+                    const msg = document.getElementById('teamMemberMsg');
+                    if (response.success) {
+                        msg.innerHTML = `<span style="color:var(--green)">✅ ${response.message}</span>`;
+                        document.getElementById('memberUserId').value = '';
+                    } else {
+                        msg.innerHTML = `<span style="color:var(--red)">⚠️ ${response.message}</span>`;
+                    }
+                },
+                error: function() {
+                    btn.disabled = false;
+                    btn.textContent = 'Add Member';
+                    document.getElementById('teamMemberMsg').innerHTML = `<span style="color:var(--red)">❌ Network error.</span>`;
+                }
+            });
+        });

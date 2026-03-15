@@ -2,7 +2,6 @@
 
 include("../../../config/database.php");
 include("../../../app/helpers/response.php");
-include("../../../app/middleware/auth.php");
 
 $sql = "SELECT 
         e.id,
