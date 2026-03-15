@@ -302,17 +302,24 @@
             };
             if (isEditMode) payload.id = parseInt(document.getElementById('editEventId').value);
 
-            /* ─── REPLACE WITH ────────────────────────────────────────────────────
-               const url = isEditMode ? 'admin_update_event.php' : 'admin_create_event.php';
-               fetch(url, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) })
-                 .then(r => r.json())
-                 .then(data => {
+            const url = isEditMode ? 'api/admin/update_event.php' : 'api/admin/create_event.php';
+
+            $.ajax({
+                url: url,
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                dataType: 'json',
+                success: function(response) {
                    btn.disabled = false;
-                   btn.innerHTML = isEditMode ? 'Save Changes' : 'Create Event';
-                   if (data.success) {
-                     if (isEditMode) {
-                       const idx = events.findIndex(e => e.id === payload.id);
-                       if (idx > -1) Object.assign(events[idx], payload);
+                    const label = isEditMode ? 'Save Changes' : 'Create Event';
+                    btn.innerHTML = `<svg viewBox="0 0 24 24" stroke-width="2.5" width="14" height="14" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg> ${label}`;
+
+                    if (response.success) {
+                        closeForm();
+                        // Reload events from server to get fresh data
+                        loadEvents();
+                        showToast('success', isEditMode ? '✅ Event updated successfully!' : '✅ Event created successfully!');
                      } else {
                        events.push({ ...payload, id: data.id, registered: 0 });
                      }
