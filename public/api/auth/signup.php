@@ -12,6 +12,12 @@ $phone = $data['phone'];
 $branch = $data['branch'];
 $year = $data['year_of_passing'];
 
+$sql = "SELECT id FROM users WHERE email='$email'";
+$check = mysqli_query($conn, $sql);
+if(mysqli_num_rows($check) > 0){
+    sendResponse(false, [], "Email already registered");
+}
+
 $sql = "INSERT INTO users (name,email,password,phone,branch,year_of_passing)
         VALUES ('$name','$email','$password','$phone','$branch','$year')";
 

@@ -21,6 +21,11 @@
                 success: function(response) {
                     if (response.success) {
                         currentUser = response.data;
+                        // Redirect admin to admin dashboard
+                        if (currentUser.role === 'admin') {
+                            window.location.href = 'admin-dashboard.html';
+                            return;
+                        }
                         setupUserUI();
                         loadEvents();
                         loadMyRegistrations();

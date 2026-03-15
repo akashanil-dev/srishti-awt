@@ -12,8 +12,8 @@ $(document).ready(function() {
         dataType: 'json',
         success: function(response) {
             if (response.success) {
-                // Already logged in, go to home
-                window.location.href = 'home.html';
+                // Already logged in — route by role
+                window.location.href = response.data.role === 'admin' ? 'admin-dashboard.html' : 'home.html';
                 return;
             }
         }
@@ -231,8 +231,9 @@ function loginSuccess(user) {
   localStorage.setItem('currentUser', JSON.stringify(user));
   closeAuth();
   showToast('👋 Welcome, ' + user.name + '!');
-  // Redirect to home dashboard
-  setTimeout(() => { window.location.href = 'home.html'; }, 500);
+  // Redirect based on role
+  const dest = user.role === 'admin' ? 'admin-dashboard.html' : 'home.html';
+  setTimeout(() => { window.location.href = dest; }, 500);
 }
 
 function logout() {

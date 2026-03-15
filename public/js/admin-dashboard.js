@@ -219,7 +219,7 @@
            EDIT MODAL
         ═══════════════════════════════════════════ */
         function openEditModal(id) {
-            const e = events.find(ev => ev.id === id);
+            const e = events.find(ev => ev.id == id);
             if (!e) return;
             isEditMode = true;
 
@@ -340,7 +340,7 @@
            DELETE MODAL
         ═══════════════════════════════════════════ */
         function openDeleteModal(id) {
-            const e = events.find(ev => ev.id === id);
+            const e = events.find(ev => ev.id == id);
             if (!e) return;
             pendingDeleteId = id;
             document.getElementById('deleteEventName').textContent = e.title;
