@@ -2,13 +2,14 @@
 
 include("../../../config/database.php");
 include("../../../app/helpers/response.php");
+include("../../../app/middleware/auth.php");
 
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 $team_name = $data['team_name'];
 $event_id = $data['event_id'];
-$created_by = $data['created_by'];
+$created_by = $user_id;
 
 if(empty($team_name) || empty($event_id) || empty($created_by)){
     sendResponse(false,[],"All fields are required");

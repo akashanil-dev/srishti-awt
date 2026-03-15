@@ -2,6 +2,7 @@
 
 include("../../../config/database.php");
 include("../../../app/helpers/response.php");
+include("../../../app/middleware/auth.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 

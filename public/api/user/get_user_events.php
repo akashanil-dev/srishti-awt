@@ -2,8 +2,8 @@
 
 include("../config/db.php");
 include("../config/response.php");
+include("../../../app/middleware/auth.php");
 
-$user_id = $_GET['user_id'];
 
 if(empty($user_id)){
     sendResponse(false,[],"User ID required");

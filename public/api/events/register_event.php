@@ -2,10 +2,10 @@
 
 include("../../../config/database.php");
 include("../../../app/helpers/response.php");
+include("../../../app/middleware/auth.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
-$user_id = $data['user_id'];
 $event_id = $data['event_id'];
 
 if(empty($user_id) || empty($event_id)){
