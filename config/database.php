@@ -1,14 +1,12 @@
 <?php
 
-$host = "localhost";
-$user = "root";
-$password = "2208";
-$database = "tech_event";
+$host = getenv("DB_HOST");
+$user = getenv("DB_USER");
+$password = getenv("DB_PASS");
+$database = getenv("DB_NAME");
 
-$conn = mysqli_connect($host,$user,$password,$database);
+$conn = mysqli_connect($host, $user, $password, $database);
 
-if(!$conn){
+if (!$conn) {
     die("Database connection failed");
 }
-
-?>
