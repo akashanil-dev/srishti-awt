@@ -50,9 +50,30 @@ mysqli_stmt_bind_param($stmt, "sii", $team_name, $event_id, $created_by);
 if (mysqli_stmt_execute($stmt)) {
 
     $team_id = mysqli_insert_id($conn);
+    mysqli_stmt_close($stmt);
+
+    /* Auto-add creator as team leader */
+    $leader_role = 'leader';
+    $stmt = mysqli_prepare($conn, "INSERT INTO team_members (team_id, user_id, role) VALUES (?, ?, ?)");
+    mysqli_stmt_bind_param($stmt, "iis", $team_id, $created_by, $leader_role);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_close($stmt);
+
+    /* Fetch creator's name and email for the UI */
+    $stmt = mysqli_prepare($conn, "SELECT name, email FROM users WHERE id=?");
+    mysqli_stmt_bind_param($stmt, "i", $created_by);
+    mysqli_stmt_execute($stmt);
+    $creator_result = mysqli_stmt_get_result($stmt);
+    $creator = mysqli_fetch_assoc($creator_result);
+    mysqli_stmt_close($stmt);
 
     sendResponse(true, [
-        "team_id" => $team_id
+        "team_id" => $team_id,
+        "leader" => [
+            "name" => $creator['name'],
+            "email" => $creator['email'],
+            "role" => "leader"
+        ]
     ], "Team created successfully");
 
 } else {
@@ -60,7 +81,5 @@ if (mysqli_stmt_execute($stmt)) {
     sendResponse(false, [], "Team creation failed");
 
 }
-
-mysqli_stmt_close($stmt);
 
 ?>

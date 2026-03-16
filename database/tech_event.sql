@@ -68,6 +68,7 @@ CREATE TABLE team_members (
 id INT AUTO_INCREMENT PRIMARY KEY,
 team_id INT,
 user_id INT,
+role ENUM('leader','member') DEFAULT 'member',
 UNIQUE KEY unique_team_user (team_id,user_id),
 FOREIGN KEY (team_id) REFERENCES teams(id) ON DELETE CASCADE,
 FOREIGN KEY (user_id) REFERENCES users(id)

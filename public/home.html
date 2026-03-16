@@ -422,13 +422,17 @@
                     <div id="teamMemberSection" style="display:none;margin-top:20px;">
                         <div
                             style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">
-                            Add Team Member</div>
-                        <div
-                            style="margin-bottom:8px;padding:10px;background:rgba(61,218,110,0.08);border-radius:8px;border:1px solid rgba(61,218,110,0.2);">
-                            <span style="color:var(--green);font-weight:600;" id="teamCreatedName">—</span>
-                            <span style="color:var(--gray);font-size:0.8rem;"> (ID: <span
-                                    id="teamCreatedId">—</span>)</span>
+                            Team Members</div>
+
+                        <!-- Member Cards List -->
+                        <div id="teamMembersList"
+                            style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
                         </div>
+
+                        <!-- Add Member Input -->
+                        <div
+                            style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px;margin-top:12px;">
+                            Add a Member</div>
                         <form id="teamMemberForm" style="display:flex;gap:8px;">
                             <input type="email" id="memberUserEmail"
                                 class="form-control bg-dark text-white border-secondary"
@@ -437,6 +441,16 @@
                                 id="addMemberBtn">Add Member</button>
                         </form>
                         <div id="teamMemberMsg" style="margin-top:8px;font-size:0.85rem;"></div>
+
+                        <!-- Finalize Team Button -->
+                        <button class="btn-modal-register" id="finalizeTeamBtn" onclick="finalizeTeam()"
+                            style="margin-top:20px;width:100%;background:linear-gradient(135deg, #3DDA6E 0%, #2bc45b 100%);">
+                            <svg viewBox="0 0 24 24" stroke-width="2.5" width="16" height="16" fill="none"
+                                stroke="currentColor">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Finalize Team
+                        </button>
                     </div>
 
                     <button class="btn-modal-close" onclick="closeTeam()" style="margin-top:16px;">Close</button>

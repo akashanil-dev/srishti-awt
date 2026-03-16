@@ -584,12 +584,14 @@ function formatDate(dateStr) {
    TEAM MANAGEMENT
 ═══════════════════════════════════════════ */
 let currentTeamId = null;
+let teamMembers = [];
+let currentTeamName = '';
 
 function openTeamModal() {
-    // Populate event select
+    // Populate event select — only team events
     const sel = document.getElementById('teamEventSelect');
     sel.innerHTML = '<option value="">— Select event —</option>' +
-        events.map(e => `<option value="${e.id}">${e.title}</option>`).join('');
+        events.filter(e => e.event_type === 'team').map(e => `<option value="${e.id}">${e.title}</option>`).join('');
 
     // If opened from a detail view, pre-select event
     if (currentDetailEvent) {
@@ -598,10 +600,13 @@ function openTeamModal() {
 
     // Reset state
     currentTeamId = null;
+    teamMembers = [];
+    currentTeamName = '';
     document.getElementById('teamCreateSection').style.display = 'block';
     document.getElementById('teamMemberSection').style.display = 'none';
     document.getElementById('teamName').value = '';
     document.getElementById('teamMemberMsg').innerHTML = '';
+    document.getElementById('teamMembersList').innerHTML = '';
 
     document.getElementById('teamOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
@@ -613,6 +618,32 @@ function closeTeam() {
 }
 function closeTeamOutside(e) {
     if (e.target === document.getElementById('teamOverlay')) closeTeam();
+}
+
+function renderTeamMembers() {
+    const container = document.getElementById('teamMembersList');
+    if (!teamMembers.length) {
+        container.innerHTML = '';
+        return;
+    }
+    container.innerHTML = teamMembers.map(m => {
+        const initials = m.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        const isLeader = m.role === 'leader';
+        const badgeColor = isLeader ? 'rgba(61,218,110,0.15)' : 'rgba(255,255,255,0.06)';
+        const badgeText = isLeader ? 'rgba(61,218,110,1)' : 'var(--gray)';
+        const roleLabel = isLeader ? '★ Leader' : 'Member';
+        return `
+            <div class="team-member-card">
+                <div class="team-member-avatar">${initials}</div>
+                <div class="team-member-info">
+                    <div class="team-member-name">${m.name}</div>
+                    <div class="team-member-email">${m.email}</div>
+                </div>
+                <div class="team-member-badge" style="background:${badgeColor};color:${badgeText};">
+                    ${roleLabel}
+                </div>
+            </div>`;
+    }).join('');
 }
 
 // Create Team
@@ -636,8 +667,15 @@ document.getElementById('teamCreateForm').addEventListener('submit', function (e
             btn.textContent = 'Create Team';
             if (response.success) {
                 currentTeamId = response.data.team_id;
-                document.getElementById('teamCreatedName').textContent = document.getElementById('teamName').value.trim();
-                document.getElementById('teamCreatedId').textContent = currentTeamId;
+                currentTeamName = document.getElementById('teamName').value.trim();
+
+                // Add creator as first member (leader)
+                teamMembers = [];
+                if (response.data.leader) {
+                    teamMembers.push(response.data.leader);
+                }
+                renderTeamMembers();
+
                 document.getElementById('teamCreateSection').style.display = 'none';
                 document.getElementById('teamMemberSection').style.display = 'block';
                 showToast('✅ ' + response.message);
@@ -682,6 +720,13 @@ document.getElementById('teamMemberForm').addEventListener('submit', function (e
             btn.textContent = 'Add Member';
             const msg = document.getElementById('teamMemberMsg');
             if (response.success) {
+                // Add to local list and render card
+                teamMembers.push({
+                    name: response.data.name,
+                    email: response.data.email,
+                    role: response.data.role || 'member'
+                });
+                renderTeamMembers();
                 msg.innerHTML = `<span style="color:var(--green)">✅ ${response.message}</span>`;
                 emailInput.value = '';
             } else {
@@ -695,3 +740,10 @@ document.getElementById('teamMemberForm').addEventListener('submit', function (e
         }
     });
 });
+
+// Finalize Team
+function finalizeTeam() {
+    closeTeam();
+    showToast(`✅ Team "${currentTeamName}" finalized with ${teamMembers.length} member${teamMembers.length !== 1 ? 's' : ''}!`);
+    loadEvents(); // Refresh event data
+}

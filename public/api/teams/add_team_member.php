@@ -73,7 +73,11 @@ $stmt = mysqli_prepare($conn, "INSERT INTO team_members (team_id,user_id) VALUES
 mysqli_stmt_bind_param($stmt, "ii", $team_id, $member_user_id);
 
 if (mysqli_stmt_execute($stmt)) {
-    sendResponse(true, [], "Added " . $user_row['name'] . " to the team successfully!");
+    sendResponse(true, [
+        "name" => $user_row['name'],
+        "email" => $email,
+        "role" => "member"
+    ], "Added " . $user_row['name'] . " to the team successfully!");
 } else {
     sendResponse(false, [], "Failed to add member");
 }
