@@ -3,22 +3,27 @@
 include_once("../../../config/database.php");
 include_once("../../../app/helpers/response.php");
 include_once("../../../app/middleware/admin.php");
+include_once("../../../app/helpers/validate.php");
 
 $data = json_decode(file_get_contents("php://input"), true);
 
 $id = $data['id'] ?? '';
 
-if(empty($id)){
-    sendResponse(false, [], "Event ID required");
+// --- Validation ---
+if (!isPositiveInt($id)) {
+    sendResponse(false, [], "Valid Event ID is required");
 }
+// --- End Validation ---
+
+$id = intval($id);
 
 $stmt = mysqli_prepare($conn, "DELETE FROM events WHERE id=?");
 mysqli_stmt_bind_param($stmt, "i", $id);
 $result = mysqli_stmt_execute($stmt);
 
-if($result){
+if ($result) {
     sendResponse(true, [], "Event deleted successfully");
-}else{
+} else {
     sendResponse(false, [], "Delete failed");
 }
 
