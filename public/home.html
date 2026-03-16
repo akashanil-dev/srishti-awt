@@ -8,7 +8,7 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap"
         rel="stylesheet" />
-        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="css/bootstrap-styles.css">
     <link rel="stylesheet" href="css/home.css" />
 </head>
@@ -36,9 +36,11 @@
                 <div class="dropdown-menu-custom">
                     <div class="dropdown-user-header">
                         <div class="duh-name" id="dropdownUserName">Alex Johnson</div>
-                        <div class="duh-email" id="dropdownUserEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="27464b425f6744484b4b42404209424352">[email&#160;protected]</a></div>
+                        <div class="duh-email" id="dropdownUserEmail"><a href="/cdn-cgi/l/email-protection"
+                                class="__cf_email__"
+                                data-cfemail="27464b425f6744484b4b42404209424352">[email&#160;protected]</a></div>
                     </div>
-                    
+
                     <button class="dropdown-item-custom danger" onclick="logout()">
                         <svg viewBox="0 0 24 24" stroke-width="2">
                             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
@@ -88,334 +90,370 @@
         </div>
 
         <!-- EVENTS -->
-         <!--Events responsive with bootstrap-->
+        <!--Events responsive with bootstrap-->
         <div class="content-area container-fluid px-0 px-md-5 mt-4">
-    
-    <div class="toolbar d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 mb-4">
-        <div class="toolbar-left d-flex align-items-center w-100 w-lg-auto">
-            <span class="toolbar-title h4 mb-0" style="font-family: 'Syne', sans-serif;">Available Events</span>
-            <span class="event-count-badge badge rounded-pill bg-success bg-opacity-10 text-success ms-2" id="visibleCount">6 events</span>
-        </div>
 
-        <div class="toolbar-right d-flex flex-wrap flex-lg-nowrap align-items-center gap-2 w-100 w-lg-auto">
-            <div class="search-wrap flex-grow-1 position-relative">
-                <svg class="position-absolute top-50 translate-middle-y ms-3" style="left: 0; width: 16px; stroke: #666;" viewBox="0 0 24 24" stroke-width="2">
-                    <circle cx="11" cy="11" r="8" />
-                    <line x1="21" y1="21" x2="16.65" y2="16.65" />
-                </svg>
-                <input type="text" class="search-input form-control bg-dark text-white border-secondary ps-5" id="searchInput" placeholder="Search events…" oninput="handleSearch()" style="border-radius: 10px; height: 40px;" />
+            <div class="toolbar d-flex flex-column flex-lg-row justify-content-between align-items-center gap-3 mb-4">
+                <div class="toolbar-left d-flex align-items-center w-100 w-lg-auto">
+                    <span class="toolbar-title h4 mb-0" style="font-family: 'Syne', sans-serif;">Available Events</span>
+                    <span class="event-count-badge badge rounded-pill bg-success bg-opacity-10 text-success ms-2"
+                        id="visibleCount">6 events</span>
+                </div>
+
+                <div class="toolbar-right d-flex flex-wrap flex-lg-nowrap align-items-center gap-2 w-100 w-lg-auto">
+                    <div class="search-wrap flex-grow-1 position-relative">
+                        <svg class="position-absolute top-50 translate-middle-y ms-3"
+                            style="left: 0; width: 16px; stroke: #666;" viewBox="0 0 24 24" stroke-width="2">
+                            <circle cx="11" cy="11" r="8" />
+                            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+                        </svg>
+                        <input type="text" class="search-input form-control bg-dark text-white border-secondary ps-5"
+                            id="searchInput" placeholder="Search events…" oninput="handleSearch()"
+                            style="border-radius: 10px; height: 40px;" />
+                    </div>
+
+                    <select class="sort-select w-auto" id="sortSelect" onchange="applySort()" style="height: 40px;">
+                        <option value="date">Sort: Date</option>
+                        <option value="seats">Sort: Seats left</option>
+                        <option value="title">Sort: Name A–Z</option>
+                    </select>
+                </div>
             </div>
 
-            <select class="sort-select w-auto" id="sortSelect" onchange="applySort()" style="height: 40px;">
-                <option value="date">Sort: Date</option>
-                <option value="seats">Sort: Seats left</option>
-                <option value="title">Sort: Name A–Z</option>
-            </select>
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="eventsGrid">
+            </div>
         </div>
-    </div>
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4" id="eventsGrid">
-        </div>
-</div>
-
-    <!-- ══════════════════════════════════
+        <!-- ══════════════════════════════════
          MY REGISTRATIONS
     ══════════════════════════════════ -->
-    <div class="content-area container-fluid px-0 px-md-5 mt-4 mb-4">
-        <div class="toolbar d-flex justify-content-between align-items-center mb-3">
-            <div class="toolbar-left d-flex align-items-center">
-                <span class="toolbar-title h4 mb-0" style="font-family: 'Syne', sans-serif;">My Registrations</span>
-                <span class="event-count-badge badge rounded-pill bg-success bg-opacity-10 text-success ms-2" id="myRegCount">0</span>
+        <div class="content-area container-fluid px-0 px-md-5 mt-4 mb-4">
+            <div class="toolbar d-flex justify-content-between align-items-center mb-3">
+                <div class="toolbar-left d-flex align-items-center">
+                    <span class="toolbar-title h4 mb-0" style="font-family: 'Syne', sans-serif;">My Registrations</span>
+                    <span class="event-count-badge badge rounded-pill bg-success bg-opacity-10 text-success ms-2"
+                        id="myRegCount">0</span>
+                </div>
+                <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="toggleMyRegs()">
+                    <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" fill="none" stroke="currentColor">
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                    Show My Events
+                </button>
             </div>
-            <button class="btn btn-sm btn-outline-secondary rounded-pill" onclick="toggleMyRegs()">
-                <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" fill="none" stroke="currentColor">
-                    <polyline points="6 9 12 15 18 9"/>
-                </svg>
-                Show My Events
-            </button>
-        </div>
-        <div id="myRegsContainer" style="display:none;">
-            <div id="myRegsList" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
-                <div class="text-center" style="color:var(--gray); grid-column:1/-1; padding:32px 0;">Loading your registrations…</div>
+            <div id="myRegsContainer" style="display:none;">
+                <div id="myRegsList" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                    <div class="text-center" style="color:var(--gray); grid-column:1/-1; padding:32px 0;">Loading your
+                        registrations…</div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- ══════════════════════════════════
+        <!-- ══════════════════════════════════
          EVENT DETAIL MODAL
     ══════════════════════════════════ -->
-    <div class="modal-overlay" id="detailOverlay" onclick="closeDetailOutside(event)">
-        <div class="modal-box">
-            <div class="modal-stripe"></div>
-            <div class="modal-inner">
-                <div class="modal-top">
-                    <div class="modal-icon">
-                        <svg viewBox="0 0 24 24" stroke-width="2">
-                            <rect x="3" y="4" width="18" height="18" rx="2" />
-                            <line x1="16" y1="2" x2="16" y2="6" />
-                            <line x1="8" y1="2" x2="8" y2="6" />
-                            <line x1="3" y1="10" x2="21" y2="10" />
-                        </svg>
-                    </div>
-                    <div class="modal-title-block">
-                        <div class="modal-event-title" id="detailTitle">Event Title</div>
-                        <div id="detailBadge" style="margin-top:6px"></div>
-                    </div>
-                    <button class="modal-close-btn" onclick="closeDetail()">
-                        <svg viewBox="0 0 24 24" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                    </button>
-                </div>
-                <div class="modal-desc" id="detailDesc"></div>
-                <div class="modal-info-grid">
-                    <div class="info-tile">
-                        <div class="info-tile-label">Date</div>
-                        <div class="info-tile-value">
+        <div class="modal-overlay" id="detailOverlay" onclick="closeDetailOutside(event)">
+            <div class="modal-box">
+                <div class="modal-stripe"></div>
+                <div class="modal-inner">
+                    <div class="modal-top">
+                        <div class="modal-icon">
                             <svg viewBox="0 0 24 24" stroke-width="2">
                                 <rect x="3" y="4" width="18" height="18" rx="2" />
                                 <line x1="16" y1="2" x2="16" y2="6" />
                                 <line x1="8" y1="2" x2="8" y2="6" />
                                 <line x1="3" y1="10" x2="21" y2="10" />
                             </svg>
-                            <span id="detailDate">—</span>
+                        </div>
+                        <div class="modal-title-block">
+                            <div class="modal-event-title" id="detailTitle">Event Title</div>
+                            <div id="detailBadge" style="margin-top:6px"></div>
+                        </div>
+                        <button class="modal-close-btn" onclick="closeDetail()">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="modal-desc" id="detailDesc"></div>
+                    <div class="modal-info-grid">
+                        <div class="info-tile">
+                            <div class="info-tile-label">Date</div>
+                            <div class="info-tile-value">
+                                <svg viewBox="0 0 24 24" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                                <span id="detailDate">—</span>
+                            </div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Max Participants</div>
+                            <div class="info-tile-value">
+                                <svg viewBox="0 0 24 24" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                                <span id="detailMax">—</span>
+                            </div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Seats Taken</div>
+                            <div class="info-tile-value">
+                                <svg viewBox="0 0 24 24" stroke-width="2">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                                    <circle cx="12" cy="7" r="4" />
+                                </svg>
+                                <span id="detailRegistered">—</span>
+                            </div>
+                        </div>
+                        <div class="info-tile">
+                            <div class="info-tile-label">Seats Remaining</div>
+                            <div class="info-tile-value" id="detailLeft" style="color:var(--green)">—</div>
                         </div>
                     </div>
-                    <div class="info-tile">
-                        <div class="info-tile-label">Max Participants</div>
-                        <div class="info-tile-value">
-                            <svg viewBox="0 0 24 24" stroke-width="2">
+                    <div class="modal-seats-section">
+                        <div class="modal-seats-header">
+                            <div class="modal-seats-title">Seat Availability</div>
+                            <div class="seats-pill" id="detailSeatsPill">—</div>
+                        </div>
+                        <div class="modal-seat-bar">
+                            <div class="modal-seat-fill" id="detailSeatsBar" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <!-- Participants Section -->
+                    <div class="participants-section">
+                        <div class="participants-header">
+                            <div class="participants-label">Registered Participants</div>
+                            <span class="participants-count" id="participantsCount"></span>
+                        </div>
+                        <div class="participants-list" id="participantsList"></div>
+                    </div>
+
+                    <div class="modal-footer-btns">
+                        <button class="btn-modal-register" id="detailRegBtn" onclick="openConfirm()">
+                            <svg viewBox="0 0 24 24" stroke-width="2.5" width="16" height="16" fill="none"
+                                stroke="currentColor">
+                                <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                            Register for this Event
+                        </button>
+                        <button class="btn-modal-team" onclick="closeDetail(); openTeamModal();">
+                            <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" fill="none"
+                                stroke="currentColor">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                                 <circle cx="9" cy="7" r="4" />
                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
                                 <path d="M16 3.13a4 4 0 0 1 0 7.75" />
                             </svg>
-                            <span id="detailMax">—</span>
-                        </div>
+                            Create Team
+                        </button>
+                        <button class="btn-modal-close" onclick="closeDetail()">Close</button>
                     </div>
-                    <div class="info-tile">
-                        <div class="info-tile-label">Seats Taken</div>
-                        <div class="info-tile-value">
-                            <svg viewBox="0 0 24 24" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                                <circle cx="12" cy="7" r="4" />
-                            </svg>
-                            <span id="detailRegistered">—</span>
-                        </div>
-                    </div>
-                    <div class="info-tile">
-                        <div class="info-tile-label">Seats Remaining</div>
-                        <div class="info-tile-value" id="detailLeft" style="color:var(--green)">—</div>
-                    </div>
-                </div>
-                <div class="modal-seats-section">
-                    <div class="modal-seats-header">
-                        <div class="modal-seats-title">Seat Availability</div>
-                        <div class="seats-pill" id="detailSeatsPill">—</div>
-                    </div>
-                    <div class="modal-seat-bar">
-                        <div class="modal-seat-fill" id="detailSeatsBar" style="width:0%"></div>
-                    </div>
-                </div>
-                <!-- Participants Section -->
-                <div class="participants-section">
-                    <div class="participants-header">
-                        <div class="participants-label">Registered Participants</div>
-                        <span class="participants-count" id="participantsCount"></span>
-                    </div>
-                    <div class="participants-list" id="participantsList"></div>
-                </div>
-
-                <div class="modal-footer-btns">
-                    <button class="btn-modal-register" id="detailRegBtn" onclick="openConfirm()">
-                        <svg viewBox="0 0 24 24" stroke-width="2.5" width="16" height="16" fill="none"
-                            stroke="currentColor">
-                            <polyline points="20 6 9 17 4 12" />
-                        </svg>
-                        Register for this Event
-                    </button>
-                    <button class="btn-modal-team" onclick="closeDetail(); openTeamModal();">
-                        <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" fill="none" stroke="currentColor">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-                        </svg>
-                        Create Team
-                    </button>
-                    <button class="btn-modal-close" onclick="closeDetail()">Close</button>
                 </div>
             </div>
         </div>
-    </div>
 
 
-    <!-- ══════════════════════════════════
+        <!-- ══════════════════════════════════
          CONFIRM REGISTRATION MODAL
          (slider-to-confirm)
     ══════════════════════════════════ -->
-    <div class="modal-overlay" id="confirmOverlay" onclick="closeConfirmOutside(event)">
-        <div class="modal-box">
-            <div class="modal-stripe"></div>
-            <div class="modal-inner">
+        <div class="modal-overlay" id="confirmOverlay" onclick="closeConfirmOutside(event)">
+            <div class="modal-box">
+                <div class="modal-stripe"></div>
+                <div class="modal-inner">
 
-                <!-- Header -->
-                <div class="modal-top" style="margin-bottom:20px">
-                    <div>
-                        <div class="modal-event-title">Confirm Registration</div>
-                        <div style="color:var(--gray);font-size:0.85rem;margin-top:4px">Review your details and slide to
-                            confirm.</div>
-                    </div>
-                    <button class="modal-close-btn" onclick="closeConfirm()">
-                        <svg viewBox="0 0 24 24" stroke-width="2">
-                            <line x1="18" y1="6" x2="6" y2="18" />
-                            <line x1="6" y1="6" x2="18" y2="18" />
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Registering as: -->
-                <div
-                    style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">
-                    Registering as</div>
-                <div class="user-summary-card">
-                    <div class="usc-avatar" id="confirmAvatar">AJ</div>
-                    <div class="usc-info">
-                        <div class="usc-name" id="confirmUserName">Alex Johnson</div>
-                        <div class="usc-email" id="confirmUserEmail"><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ceafa2abb68eada1a2a2aba9abe0abaabb">[email&#160;protected]</a></div>
-                    </div>
-                    <div class="usc-badge">Verified Student</div>
-                </div>
-
-                <!-- Event being registered for -->
-                <div
-                    style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">
-                    Registering for</div>
-                <div class="confirm-event-card">
-                    <div class="cec-label">Selected Event</div>
-                    <div class="cec-title" id="confirmEventTitle">Event Title</div>
-                    <div class="cec-meta">
-                        <div class="cec-meta-item">
-                            <svg viewBox="0 0 24 24" stroke-width="2">
-                                <rect x="3" y="4" width="18" height="18" rx="2" />
-                                <line x1="16" y1="2" x2="16" y2="6" />
-                                <line x1="8" y1="2" x2="8" y2="6" />
-                                <line x1="3" y1="10" x2="21" y2="10" />
-                            </svg>
-                            <span id="confirmEventDate">—</span>
+                    <!-- Header -->
+                    <div class="modal-top" style="margin-bottom:20px">
+                        <div>
+                            <div class="modal-event-title">Confirm Registration</div>
+                            <div style="color:var(--gray);font-size:0.85rem;margin-top:4px">Review your details and
+                                slide to
+                                confirm.</div>
                         </div>
-                        <div class="cec-meta-item">
+                        <button class="modal-close-btn" onclick="closeConfirm()">
                             <svg viewBox="0 0 24 24" stroke-width="2">
-                                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                                <circle cx="9" cy="7" r="4" />
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
                             </svg>
-                            <span id="confirmSeatsLeft">— seats left</span>
+                        </button>
+                    </div>
+
+                    <!-- Registering as: -->
+                    <div
+                        style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">
+                        Registering as</div>
+                    <div class="user-summary-card">
+                        <div class="usc-avatar" id="confirmAvatar">AJ</div>
+                        <div class="usc-info">
+                            <div class="usc-name" id="confirmUserName">Alex Johnson</div>
+                            <div class="usc-email" id="confirmUserEmail"><a href="/cdn-cgi/l/email-protection"
+                                    class="__cf_email__"
+                                    data-cfemail="ceafa2abb68eada1a2a2aba9abe0abaabb">[email&#160;protected]</a></div>
+                        </div>
+                        <div class="usc-badge">Verified Student</div>
+                    </div>
+
+                    <!-- Event being registered for -->
+                    <div
+                        style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">
+                        Registering for</div>
+                    <div class="confirm-event-card">
+                        <div class="cec-label">Selected Event</div>
+                        <div class="cec-title" id="confirmEventTitle">Event Title</div>
+                        <div class="cec-meta">
+                            <div class="cec-meta-item">
+                                <svg viewBox="0 0 24 24" stroke-width="2">
+                                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                                    <line x1="16" y1="2" x2="16" y2="6" />
+                                    <line x1="8" y1="2" x2="8" y2="6" />
+                                    <line x1="3" y1="10" x2="21" y2="10" />
+                                </svg>
+                                <span id="confirmEventDate">—</span>
+                            </div>
+                            <div class="cec-meta-item">
+                                <svg viewBox="0 0 24 24" stroke-width="2">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                </svg>
+                                <span id="confirmSeatsLeft">— seats left</span>
+                            </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Slider -->
-                <div class="slider-label" id="sliderLabel">Slide to confirm your registration →</div>
-                <div class="slider-track" id="sliderTrack">
-                    <div class="slider-fill" id="sliderFill"></div>
-                    <div class="slider-track-text" id="sliderText">Slide to Register</div>
-                    <div class="slider-arrows" id="sliderArrows">
-                        <svg viewBox="0 0 24 24" stroke-width="2.5">
-                            <polyline points="9 18 15 12 9 6" />
-                        </svg>
-                        <svg viewBox="0 0 24 24" stroke-width="2.5">
-                            <polyline points="9 18 15 12 9 6" />
-                        </svg>
-                        <svg viewBox="0 0 24 24" stroke-width="2.5">
-                            <polyline points="9 18 15 12 9 6" />
-                        </svg>
+                    <!-- Slider -->
+                    <div class="slider-label" id="sliderLabel">Slide to confirm your registration →</div>
+                    <div class="slider-track" id="sliderTrack">
+                        <div class="slider-fill" id="sliderFill"></div>
+                        <div class="slider-track-text" id="sliderText">Slide to Register</div>
+                        <div class="slider-arrows" id="sliderArrows">
+                            <svg viewBox="0 0 24 24" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                            <svg viewBox="0 0 24 24" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                            <svg viewBox="0 0 24 24" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                        </div>
+                        <div class="slider-thumb" id="sliderThumb">
+                            <svg viewBox="0 0 24 24" stroke-width="2.5">
+                                <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                        </div>
                     </div>
-                    <div class="slider-thumb" id="sliderThumb">
-                        <svg viewBox="0 0 24 24" stroke-width="2.5">
-                            <polyline points="9 18 15 12 9 6" />
-                        </svg>
+
+                    <!-- Submitting indicator -->
+                    <div class="confirm-submitting" id="confirmSubmitting">
+                        <span class="spinner"></span> Submitting your registration…
                     </div>
+
+                    <!-- Cancel -->
+                    <button class="confirm-cancel" id="confirmCancelBtn" onclick="closeConfirm()">Cancel</button>
+
                 </div>
-
-                <!-- Submitting indicator -->
-                <div class="confirm-submitting" id="confirmSubmitting">
-                    <span class="spinner"></span> Submitting your registration…
-                </div>
-
-                <!-- Cancel -->
-                <button class="confirm-cancel" id="confirmCancelBtn" onclick="closeConfirm()">Cancel</button>
-
             </div>
         </div>
-    </div>
 
 
-    <!-- ══════════════════════════════════
+        <!-- ══════════════════════════════════
          TEAM MANAGEMENT MODAL
     ══════════════════════════════════ -->
-    <div class="modal-overlay" id="teamOverlay" onclick="closeTeamOutside(event)">
-        <div class="modal-box">
-            <div class="modal-stripe"></div>
-            <div class="modal-inner">
-                <div class="modal-top">
-                    <div class="modal-title-block">
-                        <div class="modal-event-title">Team Management</div>
-                        <div style="color:var(--gray);font-size:0.85rem;margin-top:4px">Create a team or add members for your event.</div>
-                    </div>
-                    <button class="modal-close-btn" onclick="closeTeam()">
-                        <svg viewBox="0 0 24 24" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-                    </button>
-                </div>
-
-                <!-- Create Team Form -->
-                <div id="teamCreateSection">
-                    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">Create a Team</div>
-                    <form id="teamCreateForm" style="display:flex;flex-direction:column;gap:12px;">
-                        <div>
-                            <label style="font-size:0.8rem;color:var(--gray);margin-bottom:4px;display:block;">Team Name</label>
-                            <input type="text" id="teamName" class="form-control bg-dark text-white border-secondary" placeholder="Enter team name" required style="border-radius:8px;">
+        <div class="modal-overlay" id="teamOverlay" onclick="closeTeamOutside(event)">
+            <div class="modal-box">
+                <div class="modal-stripe"></div>
+                <div class="modal-inner">
+                    <div class="modal-top">
+                        <div class="modal-title-block">
+                            <div class="modal-event-title">Team Management</div>
+                            <div style="color:var(--gray);font-size:0.85rem;margin-top:4px">Create a team or add members
+                                for your event.</div>
                         </div>
-                        <div>
-                            <label style="font-size:0.8rem;color:var(--gray);margin-bottom:4px;display:block;">Event</label>
-                            <select id="teamEventSelect" class="form-select bg-dark text-white border-secondary" required style="border-radius:8px;">
-                                <option value="">— Select event —</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn-modal-register" id="teamCreateBtn">
-                            <svg viewBox="0 0 24 24" stroke-width="2.5" width="16" height="16" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                            Create Team
+                        <button class="modal-close-btn" onclick="closeTeam()">
+                            <svg viewBox="0 0 24 24" stroke-width="2">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
                         </button>
-                    </form>
-                </div>
-
-                <!-- Add Member Form (shown after team is created) -->
-                <div id="teamMemberSection" style="display:none;margin-top:20px;">
-                    <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">Add Team Member</div>
-                    <div style="margin-bottom:8px;padding:10px;background:rgba(61,218,110,0.08);border-radius:8px;border:1px solid rgba(61,218,110,0.2);">
-                        <span style="color:var(--green);font-weight:600;" id="teamCreatedName">—</span>
-                        <span style="color:var(--gray);font-size:0.8rem;"> (ID: <span id="teamCreatedId">—</span>)</span>
                     </div>
-                    <form id="teamMemberForm" style="display:flex;gap:8px;">
-                        <input type="number" id="memberUserId" class="form-control bg-dark text-white border-secondary" placeholder="User ID" required style="border-radius:8px;flex:1;">
-                        <button type="submit" class="btn-modal-register" style="white-space:nowrap;" id="addMemberBtn">Add Member</button>
-                    </form>
-                    <div id="teamMemberMsg" style="margin-top:8px;font-size:0.85rem;"></div>
-                </div>
 
-                <button class="btn-modal-close" onclick="closeTeam()" style="margin-top:16px;">Close</button>
+                    <!-- Create Team Form -->
+                    <div id="teamCreateSection">
+                        <div
+                            style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">
+                            Create a Team</div>
+                        <form id="teamCreateForm" style="display:flex;flex-direction:column;gap:12px;">
+                            <div>
+                                <label style="font-size:0.8rem;color:var(--gray);margin-bottom:4px;display:block;">Team
+                                    Name</label>
+                                <input type="text" id="teamName"
+                                    class="form-control bg-dark text-white border-secondary"
+                                    placeholder="Enter team name" required style="border-radius:8px;">
+                            </div>
+                            <div>
+                                <label
+                                    style="font-size:0.8rem;color:var(--gray);margin-bottom:4px;display:block;">Event</label>
+                                <select id="teamEventSelect" class="form-select bg-dark text-white border-secondary"
+                                    required style="border-radius:8px;">
+                                    <option value="">— Select event —</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn-modal-register" id="teamCreateBtn">
+                                <svg viewBox="0 0 24 24" stroke-width="2.5" width="16" height="16" fill="none"
+                                    stroke="currentColor">
+                                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                                    <circle cx="9" cy="7" r="4" />
+                                    <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                                    <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                                </svg>
+                                Create Team
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Add Member Form (shown after team is created) -->
+                    <div id="teamMemberSection" style="display:none;margin-top:20px;">
+                        <div
+                            style="font-size:0.72rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--gray);margin-bottom:8px">
+                            Add Team Member</div>
+                        <div
+                            style="margin-bottom:8px;padding:10px;background:rgba(61,218,110,0.08);border-radius:8px;border:1px solid rgba(61,218,110,0.2);">
+                            <span style="color:var(--green);font-weight:600;" id="teamCreatedName">—</span>
+                            <span style="color:var(--gray);font-size:0.8rem;"> (ID: <span
+                                    id="teamCreatedId">—</span>)</span>
+                        </div>
+                        <form id="teamMemberForm" style="display:flex;gap:8px;">
+                            <input type="email" id="memberUserEmail"
+                                class="form-control bg-dark text-white border-secondary"
+                                placeholder="Member's email address" required style="border-radius:8px;flex:1;">
+                            <button type="submit" class="btn-modal-register" style="white-space:nowrap;"
+                                id="addMemberBtn">Add Member</button>
+                        </form>
+                        <div id="teamMemberMsg" style="margin-top:8px;font-size:0.85rem;"></div>
+                    </div>
+
+                    <button class="btn-modal-close" onclick="closeTeam()" style="margin-top:16px;">Close</button>
+                </div>
             </div>
         </div>
-    </div>
 
 
-    <!-- TOAST -->
-    <div class="toast-wrap">
-        <div class="toast" id="toast">
-            <svg viewBox="0 0 24 24" stroke-width="2.5">
-                <polyline points="20 6 9 17 4 12" />
-            </svg>
-            <span id="toastMsg">Notification</span>
+        <!-- TOAST -->
+        <div class="toast-wrap">
+            <div class="toast" id="toast">
+                <svg viewBox="0 0 24 24" stroke-width="2.5">
+                    <polyline points="20 6 9 17 4 12" />
+                </svg>
+                <span id="toastMsg">Notification</span>
+            </div>
         </div>
-    </div>
 
     </div><!-- end page-body -->
 
