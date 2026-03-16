@@ -447,34 +447,7 @@
             background: rgba(61, 218, 110, 0.04);
         }
 
-        .filter-tabs {
-            display: flex;
-            gap: 6px;
-        }
 
-        .ftab {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--gray);
-            border-radius: 50px;
-            font-size: 0.78rem;
-            font-family: 'DM Sans', sans-serif;
-            padding: 6px 16px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .ftab:hover {
-            color: var(--white);
-            border-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .ftab.active {
-            background: var(--green);
-            color: var(--black);
-            border-color: var(--green);
-            font-weight: 700;
-        }
 
         .sort-select {
             background: var(--gray-dim);
@@ -486,6 +459,10 @@
             padding: 8px 14px;
             outline: none;
             cursor: pointer;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: none !important;
         }
 
         .sort-select option {

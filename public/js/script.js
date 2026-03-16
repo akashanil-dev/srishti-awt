@@ -29,7 +29,7 @@ function loadEvents() {
         success: function(response) {
             if (response.success) {
                 events = response.data;
-                renderEvents('all');
+                renderEvents();
             }
         },
         error: function() {
@@ -39,9 +39,9 @@ function loadEvents() {
 }
 
 /* ── RENDER EVENTS ── */
-function renderEvents(filter) {
+function renderEvents() {
   const grid = document.getElementById('eventsGrid');
-  const list = (filter === 'all') ? events : events.filter(e => e.cat === filter);
+  const list = events;
   
   if (!list.length) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--gray);">No events found.</div>';
@@ -69,30 +69,33 @@ function renderEvents(filter) {
     }
     
     return `
-      <div class="event-card">
-        <div class="event-title">${e.title || 'Untitled Event'}</div>
-        
-        <div class="event-desc">${e.description || 'No description available.'}</div>
-        
-        <div class="event-meta">
-          <div class="event-meta-item"><svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${dateStr}</div>
-          <div class="event-meta-item"><svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${seats} seats</div>
+      <div class="col">
+        <div class="card h-100 mb-4 shadow-sm event-card border-0">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title fw-bold event-title text-white">${e.title || 'Untitled Event'}</h5>
+            <p class="card-text mb-3 event-desc" style="flex-grow: 1;">${e.description || 'No description available.'}</p>
+            <div class="d-flex justify-content-between align-items-center mb-3 event-meta">
+              <div class="event-meta-item">
+                <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                ${dateStr}
+              </div>
+              <div class="event-meta-item">
+                <svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                ${seats} seats
+              </div>
+            </div>
+            <div class="event-seats mb-3">
+              <div class="seats-label">
+                <span>Seats filled</span>
+                <span style="color:${leftC}; font-weight: 600;">${full ? 'FULL' : left + ' left'}</span>
+              </div>
+              <div class="seats-track"><div class="seats-fill ${fillC}" style="width:${pct}%"></div></div>
+            </div>
+            <button class="btn btn-primary w-100 mt-auto ${btnClass}" ${full ? 'disabled' : ''} onclick="handleRegister(${e.id})">${btnLabel}</button>
+          </div>
         </div>
-        
-        <div class="event-seats">
-          <div class="seats-label"><span>Seats filled</span><span style="color:${leftC}">${full ? 'FULL' : left + ' left'}</span></div>
-          <div class="seats-track"><div class="seats-fill ${fillC}" style="width:${pct}%"></div></div>
-        </div>
-        
-        <button class="btn-register ${btnClass}" ${full ? 'disabled' : ''} onclick="handleRegister(${e.id})">${btnLabel}</button>
       </div>`;
   }).join('');
-}
-
-function filterEvents(cat, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderEvents(cat);
 }
 
 /* ── REGISTER BUTTON ── */
@@ -245,12 +248,12 @@ function logout() {
     dataType: 'json',
     success: function (response) {
       updateNav();
-      renderEvents('all');
+      renderEvents();
       showToast('You have been logged out.');
     },
     error: function() {
       updateNav();
-      renderEvents('all');
+      renderEvents();
     }
   });
 }

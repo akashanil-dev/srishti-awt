@@ -3,7 +3,6 @@
         ═══════════════════════════════════════════ */
         let currentUser = null;
         let events = [];
-        let activeFilter = 'all';
         let activeSearch = '';
         let activeSort = 'date';
         let currentDetailEvent = null;
@@ -114,17 +113,19 @@
             }
             list.innerHTML = myEvents.map(e => `
                 <div class="col">
-                    <div class="event-card" style="cursor:default;">
-                        <div class="ec-title">${e.title || 'Event'}</div>
-                        <div class="ec-desc">${e.description || ''}</div>
-                        <div class="ec-meta">
-                            <div class="ec-meta-row">
-                                <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                ${formatDate(e.event_date)}
+                    <div class="card h-100 shadow-sm border-0 event-card" style="cursor:default;">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold ec-title text-white">${e.title || 'Event'}</h5>
+                            <p class="card-text ec-desc mb-3" style="flex-grow: 1;">${e.description || ''}</p>
+                            <div class="ec-meta mb-3">
+                                <div class="ec-meta-row">
+                                    <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                                    ${formatDate(e.event_date)}
+                                </div>
                             </div>
-                        </div>
-                        <div style="margin-top:auto;padding-top:12px;">
-                            <span class="ec-badge badge-open" style="font-size:0.75rem;">✅ Registered</span>
+                            <div class="mt-auto pt-3 border-top">
+                                <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 ec-badge badge-open" style="font-size:0.75rem;">✅ Registered</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -143,7 +144,6 @@
         function renderCards() {
             const grid = document.getElementById('eventsGrid');
             let list = [...events];
-            if (activeFilter !== 'all') list = list.filter(e => e.cat === activeFilter);
             if (activeSearch.trim()) {
                 const q = activeSearch.toLowerCase();
                 list = list.filter(e => (e.title || '').toLowerCase().includes(q) || (e.description || '').toLowerCase().includes(q));
@@ -182,36 +182,43 @@
             };
             const icon = catIcons[e.cat] || catIcons.seminar;
             return `
-        <div class="event-card" onclick="openDetail(${e.id})">
-          <div class="ec-header">
-            <div class="ec-icon"><svg viewBox="0 0 24 24" stroke-width="1.8">${icon}</svg></div>
-            <div class="ec-badges">${badgeHtml}</div>
-          </div>
-          <div class="ec-title">${e.title || 'Untitled Event'}</div>
-          <div class="ec-desc">${e.description || 'No description available.'}</div>
-          <div class="ec-meta">
-            <div class="ec-meta-row">
-              <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              ${formatDate(e.event_date)}
+        <div class="col">
+          <div class="card h-100 mb-4 shadow-sm event-card border-0" onclick="openDetail(${e.id})" style="cursor: pointer; transition: transform 0.2s;">
+            <div class="card-body d-flex flex-column">
+              <div class="d-flex justify-content-between align-items-start mb-2 ec-header">
+                <div class="text-primary ec-icon"><svg width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="none" stroke-width="1.8">${icon}</svg></div>
+                <div>${badgeHtml}</div>
+              </div>
+              <h5 class="card-title fw-bold ec-title text-white">${e.title || 'Untitled Event'}</h5>
+              <p class="card-text ec-desc mb-3" style="flex-grow: 1;">${e.description || 'No description available.'}</p>
+              
+              <div class="ec-meta mb-3">
+                <div class="ec-meta-row">
+                  <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                  ${formatDate(e.event_date)}
+                </div>
+                <div class="ec-meta-row">
+                  <svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+                  Max ${maxP} participants
+                </div>
+              </div>
+
+              <div class="ec-seats mb-3">
+                <div class="ec-seats-label">
+                  <span>Seats filled</span>
+                  <span style="color:${leftC};font-weight:700">${full ? 'FULL' : left + ' left'}</span>
+                </div>
+                <div class="seats-track"><div class="seats-fill ${fillCl}" style="width:${pct}%"></div></div>
+              </div>
+
+              <button class="btn ${full ? 'btn-secondary' : 'btn-outline-primary'} w-100 mt-auto btn-view-details" onclick="openDetail(${e.id});event.stopPropagation()">
+                ${full
+                        ? '<svg viewBox="0 0 24 24" stroke-width="2" width="15" height="15" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Fully Booked'
+                        : '<svg viewBox="0 0 24 24" stroke-width="2" width="15" height="15" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> View Details'
+                    }
+              </button>
             </div>
-            <div class="ec-meta-row">
-              <svg viewBox="0 0 24 24" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
-              Max ${maxP} participants
-            </div>
           </div>
-          <div class="ec-seats">
-            <div class="ec-seats-label">
-              <span>Seats filled</span>
-              <span style="color:${leftC};font-weight:700">${full ? 'FULL' : left + ' left'}</span>
-            </div>
-            <div class="seats-track"><div class="seats-fill ${fillCl}" style="width:${pct}%"></div></div>
-          </div>
-          <button class="btn-view-details ${full ? 'full' : ''}" onclick="openDetail(${e.id});event.stopPropagation()">
-            ${full
-                    ? '<svg viewBox="0 0 24 24" stroke-width="2" width="15" height="15" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Fully Booked'
-                    : '<svg viewBox="0 0 24 24" stroke-width="2" width="15" height="15" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> View Details'
-                }
-          </button>
         </div>`;
         }
 
@@ -514,14 +521,8 @@
         }
 
         /* ═══════════════════════════════════════════
-           FILTER / SEARCH / SORT
+           SEARCH / SORT
         ═══════════════════════════════════════════ */
-        function filterTab(cat, btn) {
-            activeFilter = cat;
-            document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            renderCards();
-        }
         function handleSearch() {
             activeSearch = document.getElementById('searchInput').value;
             renderCards();

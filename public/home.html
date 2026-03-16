@@ -106,15 +106,7 @@
                 <input type="text" class="search-input form-control bg-dark text-white border-secondary ps-5" id="searchInput" placeholder="Search events…" oninput="handleSearch()" style="border-radius: 10px; height: 40px;" />
             </div>
 
-            <div class="filter-tabs d-flex gap-1 overflow-auto">
-                <button class="ftab btn btn-sm btn-outline-secondary rounded-pill active" onclick="filterTab('all',this)">All</button>
-                <button class="ftab btn btn-sm btn-outline-secondary rounded-pill" onclick="filterTab('workshop',this)">Workshops</button>
-                <button class="ftab btn btn-sm btn-outline-secondary rounded-pill" onclick="filterTab('hackathon',this)">Hackathons</button>
-                <button class="ftab btn btn-sm btn-outline-secondary rounded-pill" onclick="filterTab('seminar',this)">Seminars</button>
-                <button class="ftab btn btn-sm btn-outline-secondary rounded-pill" onclick="filterTab('competition',this)">Competitions</button>
-            </div>
-
-            <select class="sort-select form-select form-select-sm bg-dark text-white border-secondary w-auto" id="sortSelect" onchange="applySort()" style="border-radius: 8px; height: 40px;">
+            <select class="sort-select w-auto" id="sortSelect" onchange="applySort()" style="height: 40px;">
                 <option value="date">Sort: Date</option>
                 <option value="seats">Sort: Seats left</option>
                 <option value="title">Sort: Name A–Z</option>
