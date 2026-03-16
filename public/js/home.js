@@ -268,6 +268,9 @@ function openDetail(id) {
     // Load participants immediately
     loadParticipants(e.id);
 
+    // Only show "Create Team" button for team events
+    document.getElementById('detailTeamBtn').style.display = e.event_type === 'team' ? '' : 'none';
+
     document.getElementById('detailOverlay').classList.add('open');
     document.body.style.overflow = 'hidden';
 }
