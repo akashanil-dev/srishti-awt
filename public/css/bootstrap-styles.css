@@ -174,6 +174,50 @@ nav.navbar {
     }
 }
 
+/*INDEX PAGE CHANGES */
+/* Tablet and Mobile Adjustments */
+@media (max-width: 992px) {
+    .hero {
+        padding: 60px 20px; /* Give more breathing room on sides */
+        text-align: center; /* Center-align content for better mobile balance */
+    }
 
+    .hero-title {
+        font-size: clamp(2.5rem, 8vw, 4rem); /* Dynamically shrinks the font */
+        line-height: 1.1;
+        margin-bottom: 20px;
+    }
+
+    .hero-sub {
+        font-size: 1.1rem;
+        max-width: 100%; /* Ensure text doesn't stay too narrow on tablets */
+        margin: 0 auto 30px auto;
+    }
+
+    .hero-btns {
+        display: flex;
+        flex-direction: column; /* Stack buttons vertically on small screens */
+        gap: 15px;
+        align-items: center;
+    }
+
+    .btn-primary, .btn-ghost {
+        width: 100%; /* Make buttons full-width for easy thumb-tapping */
+        max-width: 300px; /* But don't let them get too wide on tablets */
+        justify-content: center;
+    }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+    .hero-tag {
+        font-size: 0.8rem;
+        padding: 5px 12px;
+    }
+    
+    .hero-title {
+        font-size: 2.2rem; /* Final reduction for very small screens */
+    }
+}
 
 
