@@ -4,45 +4,45 @@ let pendingEvent = null;
 let events = [];
 
 /* ── INIT: load events + restore session ── */
-$(document).ready(function() {
-    // Check if already logged in — redirect to home
-    $.ajax({
-        url: 'api/auth/check_session.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                // Already logged in — route by role
-                window.location.href = response.data.role === 'admin' ? 'admin-dashboard.html' : 'home.html';
-                return;
-            }
-        }
-    });
-    loadEvents();
+$(document).ready(function () {
+  // Check if already logged in — redirect to home
+  $.ajax({
+    url: 'api/auth/check_session.php',
+    type: 'GET',
+    dataType: 'json',
+    success: function (response) {
+      if (response.success) {
+        // Already logged in — route by role
+        window.location.href = response.data.role === 'admin' ? 'admin-dashboard.html' : 'home.html';
+        return;
+      }
+    }
+  });
+  loadEvents();
 });
 
 function loadEvents() {
-    $.ajax({
-        url: 'api/events/get_events.php',
-        type: 'GET',
-        dataType: 'json',
-        success: function(response) {
-            if (response.success) {
-                events = response.data;
-                renderEvents();
-            }
-        },
-        error: function() {
-            showToast('❌ Failed to load events.');
-        }
-    });
+  $.ajax({
+    url: 'api/events/get_events.php',
+    type: 'GET',
+    dataType: 'json',
+    success: function (response) {
+      if (response.success) {
+        events = response.data;
+        renderEvents();
+      }
+    },
+    error: function () {
+      showToast('❌ Failed to load events.');
+    }
+  });
 }
 
 /* ── RENDER EVENTS ── */
 function renderEvents() {
   const grid = document.getElementById('eventsGrid');
   const list = events;
-  
+
   if (!list.length) {
     grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--gray);">No events found.</div>';
     return;
@@ -52,22 +52,22 @@ function renderEvents() {
     const seats = parseInt(e.max_participants) || 0;
     const registered = parseInt(e.registered) || 0;
     const pct = seats > 0 ? Math.round((registered / seats) * 100) : 0;
-    const left = Math.max(0, seats - registered); 
+    const left = Math.max(0, seats - registered);
     const full = left <= 0 && seats > 0;
 
     const fillC = pct >= 90 ? 'danger' : pct >= 70 ? 'warn' : '';
     const leftC = pct >= 90 ? '#ef4444' : pct >= 70 ? '#f59e0b' : 'var(--green)';
-    
+
     const btnLabel = full ? 'Fully Booked' : currentUser ? 'Register →' : '🔒 Login to Register';
     const btnClass = full ? '' : currentUser ? '' : 'guest';
 
     // Format the date nicely
     let dateStr = 'TBA';
     if (e.event_date) {
-        const d = new Date(e.event_date + 'T00:00:00');
-        dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+      const d = new Date(e.event_date + 'T00:00:00');
+      dateStr = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
     }
-    
+
     return `
       <div class="col">
         <div class="card h-100 mb-4 shadow-sm event-card border-0">
@@ -251,7 +251,7 @@ function logout() {
       renderEvents();
       showToast('You have been logged out.');
     },
-    error: function() {
+    error: function () {
       updateNav();
       renderEvents();
     }
@@ -320,14 +320,14 @@ document.getElementById('registrationForm').addEventListener('submit', function 
       event_id: $('#selectedEvent').val()
     }),
     dataType: 'json',
-    success: function(response) {
+    success: function (response) {
       closeReg();
       btn.disabled = false;
       btn.textContent = 'Complete Registration →';
       showToast(response.success ? '✅ ' + response.message : '⚠️ ' + response.message);
       if (response.success) loadEvents(); // Refresh seat counts
     },
-    error: function() {
+    error: function () {
       btn.disabled = false;
       btn.textContent = 'Complete Registration →';
       showToast('❌ Network error. Please try again.');
@@ -379,7 +379,42 @@ function togglePass(inputId, btn) {
 }
 function showToast(msg) {
   const t = document.getElementById('toast');
-  document.getElementById('toastMsg').textContent = msg;
+  const icon = document.getElementById('toastIcon');
+  const msgEl = document.getElementById('toastMsg');
+
+  const successIcon = '<svg viewBox="0 0 24 24" stroke-width="2.5" width="17" height="17" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>';
+  const errorIcon = '<svg viewBox="0 0 24 24" stroke-width="2.5" width="17" height="17" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>';
+  const warnIcon = '<svg viewBox="0 0 24 24" stroke-width="2.5" width="17" height="17" fill="none" stroke="currentColor"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>';
+  const infoIcon = '<svg viewBox="0 0 24 24" stroke-width="2.5" width="17" height="17" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>';
+
+  let cleanMsg = msg;
+  if (msg.startsWith('✅')) {
+    cleanMsg = msg.replace(/^✅\s*/, '');
+    icon.innerHTML = successIcon;
+    t.style.background = 'var(--green)';
+    t.style.color = 'var(--black)';
+  } else if (msg.startsWith('❌')) {
+    cleanMsg = msg.replace(/^❌\s*/, '');
+    icon.innerHTML = errorIcon;
+    t.style.background = 'var(--red)';
+    t.style.color = '#fff';
+  } else if (msg.startsWith('⚠️')) {
+    cleanMsg = msg.replace(/^⚠️\s*/, '');
+    icon.innerHTML = warnIcon;
+    t.style.background = 'var(--amber)';
+    t.style.color = 'var(--black)';
+  } else if (msg.startsWith('👋')) {
+    cleanMsg = msg.replace(/^👋\s*/, '');
+    icon.innerHTML = infoIcon;
+    t.style.background = 'var(--green)';
+    t.style.color = 'var(--black)';
+  } else {
+    icon.innerHTML = infoIcon;
+    t.style.background = 'var(--green)';
+    t.style.color = 'var(--black)';
+  }
+
+  msgEl.textContent = cleanMsg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 4000);
 }
