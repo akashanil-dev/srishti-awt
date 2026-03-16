@@ -1,8 +1,8 @@
 <?php
 
-include("../config/db.php");
-include("../config/response.php");
-include("../../../app/middleware/auth.php");
+include_once("../../../config/database.php");
+include_once("../../../app/helpers/response.php");
+include_once("../../../app/middleware/auth.php");
 
 
 if(empty($user_id)){

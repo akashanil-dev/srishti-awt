@@ -1,8 +1,7 @@
 <?php
 
-include("../../../config/database.php");
-include("../../../app/helpers/response.php");
-include("../../../app/middleware/auth.php");
+include_once("../../../config/database.php");
+include_once("../../../app/helpers/response.php");
 
 $sql = "SELECT 
         e.id,
@@ -10,6 +9,9 @@ $sql = "SELECT
         e.description,
         e.event_date,
         e.max_participants,
+        e.event_type,
+        e.team_min,
+        e.team_max,
         COUNT(r.id) AS registered
         FROM events e
         LEFT JOIN event_registrations r

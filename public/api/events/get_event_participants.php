@@ -1,16 +1,16 @@
 <?php
 
-include("../../../config/database.php");
-include("../../../app/helpers/response.php");
-include("../../../app/middleware/auth.php");
+include_once("../../../config/database.php");
+include_once("../../../app/helpers/response.php");
+include_once("../../../app/middleware/auth.php");
 
 $event_id = $_GET['event_id'];
 
-$sql = "SELECT users.name,users.email
-        FROM registrations
+$sql = "SELECT users.name, users.email
+        FROM event_registrations
         JOIN users
-        ON users.user_id = registrations.user_id
-        WHERE registrations.event_id=$event_id";
+        ON users.id = event_registrations.user_id
+        WHERE event_registrations.event_id='$event_id'";
 
 $result = mysqli_query($conn,$sql);
 

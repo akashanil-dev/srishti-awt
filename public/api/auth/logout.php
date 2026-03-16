@@ -1,6 +1,6 @@
 <?php
 
-include("../../../app/helpers/response.php");
+include_once("../../../app/helpers/response.php");
 
 session_start();
 
