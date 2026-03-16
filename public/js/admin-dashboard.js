@@ -169,9 +169,9 @@
         ═══════════════════════════════════════════ */
         function updateStats() {
             document.getElementById('scTotal').textContent = events.length;
-            document.getElementById('scCapacity').textContent = events.reduce((s, e) => s + e.max_participants, 0);
+            document.getElementById('scCapacity').textContent = events.reduce((s, e) => s + (parseInt(e.max_participants) || 0), 0);
             document.getElementById('scTeam').textContent = events.filter(e => e.event_type === 'team').length;
-            document.getElementById('scFull').textContent = events.filter(e => e.registered >= e.max_participants).length;
+            document.getElementById('scFull').textContent = events.filter(e => (parseInt(e.registered) || 0) >= (parseInt(e.max_participants) || 0)).length;
         }
 
         /* ═══════════════════════════════════════════
@@ -405,8 +405,10 @@
            HELPERS
         ═══════════════════════════════════════════ */
         function getStatus(e) {
-            if (e.registered >= e.max_participants) return 'full';
-            if ((e.registered / e.max_participants) >= 0.7) return 'filling';
+            const reg = parseInt(e.registered) || 0;
+            const max = parseInt(e.max_participants) || 0;
+            if (max > 0 && reg >= max) return 'full';
+            if (max > 0 && (reg / max) >= 0.7) return 'filling';
             return 'open';
         }
         function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }

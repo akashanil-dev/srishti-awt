@@ -4,12 +4,11 @@ include_once("../../../config/database.php");
 include_once("../../../app/helpers/response.php");
 include_once("../../../app/middleware/auth.php");
 
-
 if(empty($user_id)){
     sendResponse(false,[],"User ID required");
 }
 
-$sql = "SELECT 
+$stmt = mysqli_prepare($conn, "SELECT 
         e.id,
         e.title,
         e.description,
@@ -17,9 +16,10 @@ $sql = "SELECT
         FROM events e
         JOIN event_registrations r
         ON e.id = r.event_id
-        WHERE r.user_id = '$user_id'";
-
-$result = mysqli_query($conn,$sql);
+        WHERE r.user_id = ?");
+mysqli_stmt_bind_param($stmt, "i", $user_id);
+mysqli_stmt_execute($stmt);
+$result = mysqli_stmt_get_result($stmt);
 
 $events = [];
 
@@ -28,5 +28,7 @@ while($row = mysqli_fetch_assoc($result)){
 }
 
 sendResponse(true,$events);
+
+mysqli_stmt_close($stmt);
 
 ?>

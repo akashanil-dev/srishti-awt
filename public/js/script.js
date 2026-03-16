@@ -332,27 +332,7 @@ document.getElementById('registrationForm').addEventListener('submit', function 
   });
 });
 
-function loadParticipants() {
-  const list = document.getElementById('participantsList');
-  if (!list) return;
-  list.innerHTML = `<div class="table-row"><span style="grid-column:1/-1;text-align:center;color:var(--gray)">Loading…</span></div>`;
-
-  $.ajax({
-      url: 'api/events/get_event_participants.php',
-      type: 'GET',
-      data: { event_id: selectedEventId },
-      dataType: 'json',
-      success: function(response) {
-          if (response.success) {
-               list.innerHTML = response.data.map(p => `
-                  <div class="table-row">
-                    <span class="participant-name">${p.name}</span>
-                    <span style="color:var(--gray);font-size:0.85rem">${p.email}</span>
-                  </div>`).join('');
-          }
-      }
-  });
-}
+/* loadParticipants removed — was using undefined selectedEventId */
 
 /* ── HELPERS ── */
 function vf(id, errId, check, msg) {
