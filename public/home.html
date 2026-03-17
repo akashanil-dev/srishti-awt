@@ -467,6 +467,51 @@
         </div>
 
 
+        <!-- DE-REGISTER CONFIRMATION MODAL -->
+        <div class="modal-overlay" id="deregOverlay" onclick="closeDeregOutside(event)">
+            <div class="modal-box" style="max-width:420px;">
+                <div class="modal-stripe" style="background:linear-gradient(90deg,var(--red),#c0392b);"></div>
+                <div class="modal-inner" style="padding:24px;">
+                    <div
+                        style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;">
+                        <div style="display:flex;align-items:center;gap:12px;">
+                            <div
+                                style="width:40px;height:40px;border-radius:10px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.2);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                <svg viewBox="0 0 24 24" stroke-width="2" width="20" height="20" fill="none"
+                                    stroke="var(--red)">
+                                    <path
+                                        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                                    <line x1="12" y1="9" x2="12" y2="13" />
+                                    <line x1="12" y1="17" x2="12.01" y2="17" />
+                                </svg>
+                            </div>
+                            <div>
+                                <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:1.1rem;">Confirm
+                                    De-registration</div>
+                            </div>
+                        </div>
+                        <button class="btn-modal-close" onclick="closeDeregConfirm()"
+                            style="width:32px;height:32px;border-radius:50%;border:1px solid var(--border);background:transparent;color:var(--gray);display:flex;align-items:center;justify-content:center;cursor:pointer;">
+                            <svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" fill="none"
+                                stroke="currentColor">
+                                <line x1="18" y1="6" x2="6" y2="18" />
+                                <line x1="6" y1="6" x2="18" y2="18" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="deregConfirmMsg"
+                        style="font-size:0.88rem;color:var(--gray);line-height:1.6;margin-bottom:20px;"></div>
+                    <div style="display:flex;gap:10px;">
+                        <button id="deregConfirmBtn" class="btn-green" onclick="confirmDereg()"
+                            style="flex:1;background:var(--red);color:#fff;border:none;padding:12px;border-radius:50px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.88rem;cursor:pointer;">Yes,
+                            De-register</button>
+                        <button class="btn-modal-close" onclick="closeDeregConfirm()"
+                            style="padding:12px 20px;border-radius:50px;border:1px solid var(--border);background:transparent;color:var(--white);font-family:'DM Sans',sans-serif;font-weight:500;font-size:0.88rem;cursor:pointer;">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- TOAST -->
         <div class="toast-wrap">
             <div class="toast" id="toast">

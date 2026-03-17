@@ -103,39 +103,142 @@ function loadMyRegistrations() {
 function renderMyRegistrations(myEvents) {
     const list = document.getElementById('myRegsList');
     if (!myEvents.length) {
-        list.innerHTML = `<div class="col-12 text-center" style="color:var(--gray); padding:32px 0;">
-                    <svg viewBox="0 0 24 24" stroke-width="1.5" width="40" height="40" fill="none" stroke="currentColor" style="margin-bottom:12px;opacity:0.4">
+        list.innerHTML = `<div class="col-12 text-center" style="color:var(--gray); padding:48px 0;">
+                    <svg viewBox="0 0 24 24" stroke-width="1.5" width="44" height="44" fill="none" stroke="currentColor" style="margin-bottom:14px;opacity:0.3">
                         <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
                     </svg>
-                    <p>You haven't registered for any events yet.</p>
+                    <p style="font-size:0.92rem;">You haven't registered for any events yet.</p>
+                    <p style="font-size:0.78rem;color:var(--gray);opacity:0.7;">Browse events above and register or join a team!</p>
                 </div>`;
         return;
     }
-    list.innerHTML = myEvents.map(e => `
-                <div class="col">
-                    <div class="card h-100 shadow-sm border-0 event-card" style="cursor:default;">
-                        <div class="card-body d-flex flex-column">
-                            <h5 class="card-title fw-bold ec-title text-white">${e.title || 'Event'}</h5>
-                            <p class="card-text ec-desc mb-3" style="flex-grow: 1;">${e.description || ''}</p>
-                            <div class="ec-meta mb-3">
-                                <div class="ec-meta-row">
-                                    <svg viewBox="0 0 24 24" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-                                    ${formatDate(e.event_date)}
-                                </div>
-                            </div>
-                            <div class="mt-auto pt-3 border-top">
-                                <span class="badge bg-success bg-opacity-10 text-success border border-success px-2 py-1 ec-badge badge-open" style="font-size:0.75rem;">✅ Registered</span>
-                            </div>
+    list.innerHTML = myEvents.map(e => {
+        const isTeam = e.reg_type === 'team';
+        const isLeader = e.team_role === 'leader';
+        const typeIcon = isTeam
+            ? '<svg viewBox="0 0 24 24" stroke-width="2" width="18" height="18" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>'
+            : '<svg viewBox="0 0 24 24" stroke-width="2" width="18" height="18" fill="none" stroke="currentColor"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>';
+
+        const roleBadge = isTeam
+            ? `<span class="myreg-role-badge ${isLeader ? 'leader' : 'member'}">${isLeader ? '★ Leader' : 'Member'}</span>`
+            : '<span class="myreg-role-badge solo">Solo</span>';
+
+        const teamPill = isTeam && e.team_name
+            ? `<div class="myreg-team-pill"><svg viewBox="0 0 24 24" stroke-width="2" width="12" height="12" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>${e.team_name}</div>`
+            : '';
+
+        const deregData = isTeam
+            ? `data-type="team" data-event="${e.event_id}" data-team="${e.team_id}" data-role="${e.team_role}" data-title="${(e.title || '').replace(/"/g, '&quot;')}" data-teamname="${(e.team_name || '').replace(/"/g, '&quot;')}"`
+            : `data-type="registration" data-event="${e.event_id}" data-role="solo" data-title="${(e.title || '').replace(/"/g, '&quot;')}"`;
+
+        return `
+            <div class="col">
+                <div class="myreg-card">
+                    <div class="myreg-card-top">
+                        <div class="myreg-icon-wrap ${isTeam ? 'team' : 'solo'}">${typeIcon}</div>
+                        <div class="myreg-card-info">
+                            <div class="myreg-event-title">${e.title || 'Event'}</div>
+                            <div class="myreg-event-desc">${e.description || ''}</div>
                         </div>
+                        ${roleBadge}
+                    </div>
+                    ${teamPill}
+                    <div class="myreg-card-bottom">
+                        <div class="myreg-date">
+                            <svg viewBox="0 0 24 24" stroke-width="2" width="13" height="13" fill="none" stroke="currentColor"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                            ${formatDate(e.event_date)}
+                        </div>
+                        <button class="myreg-dereg-btn" onclick="openDeregConfirm(this)" ${deregData}>
+                            <svg viewBox="0 0 24 24" stroke-width="2" width="13" height="13" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                            De-register
+                        </button>
                     </div>
                 </div>
-            `).join('');
+            </div>`;
+    }).join('');
+}
+
+/* De-registration confirmation */
+let pendingDereg = null;
+
+function openDeregConfirm(btn) {
+    const type = btn.dataset.type;
+    const eventId = btn.dataset.event;
+    const teamId = btn.dataset.team || null;
+    const role = btn.dataset.role;
+    const title = btn.dataset.title;
+    const teamName = btn.dataset.teamname || '';
+
+    pendingDereg = { type, eventId, teamId, role };
+
+    let msg = '';
+    if (type === 'team' && role === 'leader') {
+        msg = `As the leader, de-registering will <strong style="color:var(--red)">disband the entire team "${teamName}"</strong> and remove all members from <strong>${title}</strong>. This cannot be undone.`;
+    } else if (type === 'team') {
+        msg = `You will leave team <strong>"${teamName}"</strong> for the event <strong>${title}</strong>. You can ask the leader to re-add you later.`;
+    } else {
+        msg = `You will be de-registered from <strong>${title}</strong>. You can register again later if seats are available.`;
+    }
+
+    document.getElementById('deregConfirmMsg').innerHTML = msg;
+    document.getElementById('deregOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeDeregConfirm() {
+    document.getElementById('deregOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+    pendingDereg = null;
+}
+function closeDeregOutside(e) {
+    if (e.target === document.getElementById('deregOverlay')) closeDeregConfirm();
+}
+
+function confirmDereg() {
+    if (!pendingDereg) return;
+    const btn = document.getElementById('deregConfirmBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="dereg-spinner"></span> Processing…';
+
+    $.ajax({
+        url: 'api/user/deregister.php',
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            type: pendingDereg.type,
+            event_id: pendingDereg.eventId,
+            team_id: pendingDereg.teamId
+        }),
+        dataType: 'json',
+        success: function (response) {
+            btn.disabled = false;
+            btn.innerHTML = 'Yes, De-register';
+            closeDeregConfirm();
+            if (response.success) {
+                showToast('✅ ' + response.message);
+                loadMyRegistrations();
+                loadEvents();
+            } else {
+                showToast('❌ ' + response.message);
+            }
+        },
+        error: function () {
+            btn.disabled = false;
+            btn.innerHTML = 'Yes, De-register';
+            closeDeregConfirm();
+            showToast('❌ Network error. Please try again.');
+        }
+    });
 }
 
 let myRegsVisible = false;
 function toggleMyRegs() {
     myRegsVisible = !myRegsVisible;
     document.getElementById('myRegsContainer').style.display = myRegsVisible ? 'block' : 'none';
+    const btn = document.querySelector('[onclick="toggleMyRegs()"]');
+    if (btn) btn.innerHTML = myRegsVisible
+        ? '<svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" fill="none" stroke="currentColor"><polyline points="18 15 12 9 6 15"/></svg> Hide My Events'
+        : '<svg viewBox="0 0 24 24" stroke-width="2" width="14" height="14" fill="none" stroke="currentColor"><polyline points="6 9 12 15 18 9"/></svg> Show My Events';
 }
 
 /* ═══════════════════════════════════════════
