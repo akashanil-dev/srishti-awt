@@ -133,7 +133,7 @@ function switchToLogin() {
 }
 
 /* ── LOGIN SUBMIT ── */
-document.getElementById('loginForm').addEventListener('submit', function (e) {
+$('#loginForm').on('submit', function (e) {
   e.preventDefault();
   let ok = true;
   ok &= vf('loginEmail', 'loginEmailErr', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Please enter a valid email address.');
@@ -171,12 +171,12 @@ document.getElementById('loginForm').addEventListener('submit', function (e) {
 });
 
 /* ── SIGNUP SUBMIT ── */
-document.getElementById('signupForm').addEventListener('submit', function (e) {
+$('#signupForm').on('submit', function (e) {
   e.preventDefault();
   let ok = true;
   ok &= vf('signupName', 'signupNameErr', v => v.length >= 2, 'Please enter your full name.');
   ok &= vf('signupEmail', 'signupEmailErr', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Please enter a valid email address.');
-  ok &= vf('signupPhone', 'signupPhoneErr', v => /^[\d\s\+\-]{7,15}$/.test(v), 'Please enter a valid phone number.');
+  ok &= vf('signupPhone', 'signupPhoneErr', v => /^\d{10}$/.test(v), 'Please enter a valid 10-digit phone number.');
   ok &= vf('signupBranch', 'signupBranchErr', v => v !== '', 'Please select your branch.');
   ok &= vf('signupYear', 'signupYearErr', v => v !== '', 'Please select your year of passing.');
   ok &= vf('signupPass', 'signupPassErr', v => v.length >= 8, 'Password must be at least 8 characters.');
@@ -300,12 +300,12 @@ function populateEventSelect() {
     }).map(e => `<option value="${e.id}">${e.title}</option>`).join('');
 }
 
-document.getElementById('registrationForm').addEventListener('submit', function (e) {
+$('#registrationForm').on('submit', function (e) {
   e.preventDefault();
   let ok = true;
   ok &= vf('studentName', 'nameErr', v => v.length >= 2, 'Please enter your full name.');
   ok &= vf('studentEmail', 'emailErr', v => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v), 'Please enter a valid email.');
-  ok &= vf('studentPhone', 'phoneErr', v => /^[\d\s\+\-]{7,15}$/.test(v), 'Please enter a valid phone number.');
+  ok &= vf('studentPhone', 'phoneErr', v => /^\d{10}$/.test(v), 'Please enter a valid 10-digit phone number.');
   ok &= vf('selectedEvent', 'eventErr', v => v !== '', 'Please select an event.');
   if (!ok) return;
 
@@ -339,38 +339,34 @@ document.getElementById('registrationForm').addEventListener('submit', function 
 
 /* ── HELPERS ── */
 function vf(id, errId, check, msg) {
-  const val = document.getElementById(id).value.trim();
-  const el = document.getElementById(id);
-  const err = document.getElementById(errId);
+  const $el = $('#' + id);
+  const $err = $('#' + errId);
+  const val = $el.val() ? $el.val().trim() : '';
+
   if (!check(val)) {
-    el.classList.add('error');
-    err.textContent = msg;
-    err.classList.add('show');
-    err.classList.remove('d-none');
+    $el.addClass('error');
+    if (msg) $err.text(msg);
+    $err.addClass('show').removeClass('d-none');
     return false;
   }
-  el.classList.remove('error');
-  err.classList.remove('show');
-  err.classList.add('d-none');
+  $el.removeClass('error');
+  $err.removeClass('show').addClass('d-none');
   return true;
 }
 
 function showFieldError(errId, msg) {
-  const err = document.getElementById(errId);
-  if (err) {
-    err.textContent = msg;
-    err.classList.add('show');
-    err.classList.remove('d-none');
+  const $err = $('#' + errId);
+  if ($err.length) {
+    if (msg) $err.text(msg);
+    $err.addClass('show').removeClass('d-none');
   }
 }
 
 function clearFormErrors(...ids) {
   ids.forEach(id => {
-    const el = document.getElementById(id); if (el) el.classList.remove('error');
+    $('#' + id).removeClass('error');
   });
-  document.querySelectorAll('.form-error, .form-text').forEach(e => {
-    e.classList.remove('show');
-  });
+  $('.form-error, .form-text').removeClass('show');
 }
 function togglePass(inputId, btn) {
   const inp = document.getElementById(inputId);

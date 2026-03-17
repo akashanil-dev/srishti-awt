@@ -68,11 +68,11 @@ function populateUI() {
 /* ═══════════════════════════════════════════
    PROFILE FORM SUBMIT
 ═══════════════════════════════════════════ */
-document.getElementById('profileForm').addEventListener('submit', function (e) {
+$('#profileForm').on('submit', function (e) {
     e.preventDefault();
     let ok = true;
     ok &= vf('pName', 'pNameErr', v => v.length >= 2);
-    ok &= vf('pPhone', 'pPhoneErr', v => /^[\d\s\+\-]{7,15}$/.test(v));
+    ok &= vf('pPhone', 'pPhoneErr', v => /^\d{10}$/.test(v), 'Please enter a valid 10-digit phone number.');
     ok &= vf('pBranch', 'pBranchErr', v => v !== '');
     ok &= vf('pYear', 'pYearErr', v => v !== '');
     if (!ok) return;
@@ -116,7 +116,7 @@ document.getElementById('profileForm').addEventListener('submit', function (e) {
 /* ═══════════════════════════════════════════
    PASSWORD FORM SUBMIT
 ═══════════════════════════════════════════ */
-document.getElementById('passwordForm').addEventListener('submit', function (e) {
+$('#passwordForm').on('submit', function (e) {
     e.preventDefault();
     let ok = true;
     ok &= vf('pCurPass', 'pCurPassErr', v => v.length > 0);
@@ -278,16 +278,16 @@ function logout() {
    HELPERS
 ═══════════════════════════════════════════ */
 function vf(id, errId, check) {
-    const val = document.getElementById(id).value.trim();
-    const el = document.getElementById(id);
-    const err = document.getElementById(errId);
+    const $el = $('#' + id);
+    const $err = $('#' + errId);
+    const val = $el.val() ? $el.val().trim() : '';
     if (!check(val)) {
-        el.classList.add('error');
-        err.classList.add('show');
+        $el.addClass('error');
+        $err.addClass('show');
         return false;
     }
-    el.classList.remove('error');
-    err.classList.remove('show');
+    $el.removeClass('error');
+    $err.removeClass('show');
     return true;
 }
 
