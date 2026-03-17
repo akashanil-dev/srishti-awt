@@ -7,6 +7,7 @@ let activeSearch = '';
 let activeSort = 'date';
 let currentDetailEvent = null;
 let myRegistrations = 0;
+let registeredEventIds = new Set();
 
 /* ═══════════════════════════════════════════
    INIT
@@ -92,9 +93,11 @@ function loadMyRegistrations() {
             if (response.success) {
                 const myEvents = response.data;
                 myRegistrations = myEvents.length;
+                registeredEventIds = new Set(myEvents.map(e => parseInt(e.event_id)));
                 document.getElementById('statRegistered').textContent = myRegistrations;
                 document.getElementById('myRegCount').textContent = myRegistrations;
                 renderMyRegistrations(myEvents);
+                renderCards(); // re-render to hide registered events
             }
         }
     });
@@ -246,7 +249,7 @@ function toggleMyRegs() {
 ═══════════════════════════════════════════ */
 function renderCards() {
     const grid = document.getElementById('eventsGrid');
-    let list = [...events];
+    let list = events.filter(e => !registeredEventIds.has(parseInt(e.id)));
     if (activeSearch.trim()) {
         const q = activeSearch.toLowerCase();
         list = list.filter(e => (e.title || '').toLowerCase().includes(q) || (e.description || '').toLowerCase().includes(q));
