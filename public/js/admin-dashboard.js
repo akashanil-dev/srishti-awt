@@ -145,6 +145,12 @@
           <td>${statusHtml}</td>
           <td>
             <div class="action-btns">
+              <button class="action-btn view" title="View Participants" onclick="openParticipantsModal(${e.id})">
+                <svg viewBox="0 0 24 24" stroke-width="2" fill="none" stroke="currentColor">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+              </button>
               <button class="action-btn edit" title="Edit" onclick="openEditModal(${e.id})">
                 <svg viewBox="0 0 24 24" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
@@ -385,6 +391,60 @@
                 }
             });
         }
+
+        /* ═══════════════════════════════════════════
+           PARTICIPANTS MODAL
+        ═══════════════════════════════════════════ */
+        function openParticipantsModal(id) {
+            const e = events.find(ev => ev.id == id);
+            if (!e) return;
+
+            document.getElementById('pModalTitle').textContent = e.title;
+            const listEl = document.getElementById('participantsList');
+            listEl.innerHTML = '<div class="participants-loading"><span class="spinner"></span> Loading participants…</div>';
+            
+            openModal('participantsOverlay');
+
+            $.ajax({
+                url: 'api/events/get_event_participants.php',
+                type: 'GET',
+                data: { event_id: id },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        renderParticipants(response.data);
+                    } else {
+                        listEl.innerHTML = `<div class="participants-error" style="color:var(--red);padding:20px;text-align:center;">${response.message || 'Failed to load participants.'}</div>`;
+                    }
+                },
+                error: function() {
+                    listEl.innerHTML = '<div class="participants-error" style="color:var(--red);padding:20px;text-align:center;">Network error. Could not reach server.</div>';
+                }
+            });
+        }
+
+        function renderParticipants(data) {
+            const listEl = document.getElementById('participantsList');
+            if (!data || data.length === 0) {
+                listEl.innerHTML = '<div style="text-align:center;padding:40px 20px;color:var(--gray);">No participants have registered for this event yet.</div>';
+                return;
+            }
+
+            listEl.innerHTML = data.map((p, i) => `
+                <div class="participant-card">
+                    <div style="width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;color:var(--gray);flex-shrink:0;">
+                        ${i + 1}
+                    </div>
+                    <div class="participant-info">
+                        <div class="p-name">${escHtml(p.name)}</div>
+                        <div class="p-email">${escHtml(p.email)}</div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function closeParticipantsModal() { closeModal('participantsOverlay'); }
+        function closeParticipantsOutside(e) { if (e.target === document.getElementById('participantsOverlay')) closeParticipantsModal(); }
 
         /* ═══════════════════════════════════════════
            DROPDOWN

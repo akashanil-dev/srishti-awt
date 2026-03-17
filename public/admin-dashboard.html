@@ -217,8 +217,8 @@
 
                     <!-- Description -->
                     <div class="form-group">
-                        <div class="form-label-row">
-                            <label class="form-label" style="margin-bottom:0">Description <span
+                        <div class="desc-label-row">
+                            <label class="form-label mb-0">Description <span
                                     class="req">*</span></label>
                             <span class="char-count" id="descCount">0 / 600</span>
                         </div>
@@ -231,13 +231,13 @@
                     <div class="form-divider"></div>
 
                     <!-- Date + Max participants -->
-                    <div class="form-row" style="margin-bottom:16px">
-                        <div class="form-group" style="margin-bottom:0">
+                    <div class="form-row mb-16">
+                        <div class="form-group mb-0">
                             <label class="form-label">Event Date <span class="req">*</span></label>
                             <input type="date" class="form-control" id="fDate" />
                             <div class="form-error" id="fDateErr">Please select an event date.</div>
                         </div>
-                        <div class="form-group" style="margin-bottom:0">
+                        <div class="form-group mb-0">
                             <label class="form-label">Max Participants <span class="req">*</span></label>
                             <input type="number" class="form-control" id="fMax" placeholder="e.g. 50" min="1"
                                 max="1000" />
@@ -248,7 +248,7 @@
                     <div class="form-divider"></div>
 
                     <!-- Event Type Toggle -->
-                    <div class="form-group" style="margin-bottom:12px">
+                    <div class="form-group mb-12">
                         <label class="form-label">Event Type <span class="req">*</span></label>
                         <div class="event-type-toggle">
 
@@ -298,9 +298,8 @@
 
                     <!-- Team size fields (conditional) -->
                     <div class="team-fields" id="teamFields">
-                        <label class="form-label" style="margin-bottom:10px">
-                            <svg viewBox="0 0 24 24" stroke-width="2" width="13" height="13"
-                                style="display:inline;vertical-align:middle;stroke:var(--purple);fill:none;margin-right:5px">
+                        <label class="team-size-config-label">
+                            <svg viewBox="0 0 24 24" stroke-width="2" width="13" height="13" fill="none">
                                 <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
                                 <circle cx="9" cy="7" r="4" />
                                 <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
@@ -309,22 +308,22 @@
                             Team Size Configuration <span class="req">*</span>
                         </label>
                         <div class="form-row">
-                            <div class="form-group" style="margin-bottom:0">
-                                <label class="form-label" style="color:var(--gray)">Min Members per Team <span
+                            <div class="form-group mb-0">
+                                <label class="form-label grey-label">Min Members per Team <span
                                         class="req">*</span></label>
                                 <input type="number" class="form-control" id="fTeamMin" placeholder="e.g. 2" min="2"
                                     max="20" />
                                 <div class="form-error" id="fTeamMinErr">Enter min team size (2–20).</div>
                             </div>
-                            <div class="form-group" style="margin-bottom:0">
-                                <label class="form-label" style="color:var(--gray)">Max Members per Team <span
+                            <div class="form-group mb-0">
+                                <label class="form-label grey-label">Max Members per Team <span
                                         class="req">*</span></label>
                                 <input type="number" class="form-control" id="fTeamMax" placeholder="e.g. 4" min="2"
                                     max="20" />
                                 <div class="form-error" id="fTeamMaxErr">Enter max team size (≥ min).</div>
                             </div>
                         </div>
-                        <div class="form-hint" style="margin-top:10px;color:rgba(168,85,247,0.6)">
+                        <div class="team-config-hint">
                             Each registered team must have between the min and max number of members.
                         </div>
                     </div>
@@ -354,7 +353,7 @@
             <div class="modal-stripe red"></div>
             <div class="modal-inner">
 
-                <div class="modal-header" style="margin-bottom:10px">
+                <div class="modal-header mb-10">
                     <div>
                         <div class="modal-title">Delete Event</div>
                         <div class="modal-sub">This action is permanent and cannot be undone.</div>
@@ -377,7 +376,7 @@
                     </svg>
                 </div>
 
-                <div style="color:var(--gray);font-size:0.86rem;margin-bottom:4px">You are about to permanently delete:
+                <div class="delete-permanent-hint">You are about to permanently delete:
                 </div>
                 <div class="delete-event-name" id="deleteEventName">—</div>
 
@@ -402,6 +401,40 @@
                     <button class="btn-form-cancel" onclick="closeDelete()">Cancel</button>
                 </div>
 
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ══════════════════════════════════════
+       PARTICIPANTS MODAL
+  ══════════════════════════════════════ -->
+    <div class="modal-overlay" id="participantsOverlay" onclick="closeParticipantsOutside(event)">
+        <div class="modal-box">
+            <div class="modal-stripe"></div>
+            <div class="modal-inner">
+                <div class="modal-header mb-20">
+                    <div>
+                        <div class="modal-title" id="pModalTitle">Event Participants</div>
+                        <div class="modal-sub" id="pModalSub">List of registered users for this event.</div>
+                    </div>
+                    <button class="modal-close" onclick="closeParticipantsModal()">
+                        <svg viewBox="0 0 24 24" stroke-width="2">
+                            <line x1="18" y1="6" x2="6" y2="18" />
+                            <line x1="6" y1="6" x2="18" y2="18" />
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="participants-container">
+                    <div id="participantsList" class="participants-list-admin">
+                        <!-- Participants will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn-form-cancel" onclick="closeParticipantsModal()">Close</button>
+                </div>
             </div>
         </div>
     </div>
