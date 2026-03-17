@@ -1,24 +1,49 @@
-# Abstract
+# Srishti 2026 - Online Event Registration Portal
 
-The **Online Event Registration Portal** is a responsive web-based application designed to streamline and modernize the process of managing event registrations for a college technology festival. In many institutions, event registration is often handled manually through paper forms or basic spreadsheets, which can lead to errors, duplicate entries, long queues, and inefficient management of participant data. This project aims to provide a digital solution that allows students to easily view event details and register online through a user-friendly and interactive platform.
+## Overview
+The **Online Event Registration Portal** is a responsive web-based application designed to streamline and modernize the process of managing event registrations for a college technology festival. It provides a digital solution that allows students to easily view event details, form teams, and register online through a user-friendly and interactive platform.
 
-The system provides a dedicated **Event Listing Page** where all available events are displayed in an organized and visually appealing format using the **Bootstrap card layout**. Each event card includes important information such as the **event title, short description, and the number of available seats**. In addition, every card contains a **Registration button** that allows students to quickly initiate the registration process. The responsive design ensures that the application can be accessed smoothly on different devices such as desktops, tablets, and mobile phones, making the system convenient for students to use anytime and anywhere.
+The system features:
+- **Student Portal:** Browse events with a dynamic card interface showing available seats. Students can register for solo events, form teams for group events, view their registrations, and update their profile.
+- **Admin Dashboard:** A secured area for admins to Create, Read, Update, and Delete events. Admins can view detailed lists of registered participants and track seat availability dynamically.
+- **De-registration & Teams:** Users can de-register from events, and team leaders have the authority to disband teams securely.
+- **AJAX-driven Validation:** Comprehensive client-side jQuery and server-side PHP validation for all forms (Signup, Login, Event action, Profile updates).
 
-When a student clicks the **Register** button, a **Bootstrap modal form** appears on the screen without redirecting the user to a different page. This modal form collects essential participant details including **Student Name, Email Address, Phone Number, and the Selected Event**. The use of a modal window enhances the user experience by keeping the interaction simple, fast, and focused on the current page.
+## How to Run This Project
 
-To ensure that the data entered by users is valid and complete, the system implements **client-side form validation using jQuery**. The validation process checks that all required fields are properly filled and that the input follows correct formats, such as a valid email address or phone number. This reduces the chances of incorrect or incomplete data being submitted and improves the overall reliability of the system.
+1. **Prerequisites**: Ensure you have a functional stack running PHP and MySQL/MariaDB (e.g., LAMP, XAMPP, WAMP).
+2. **Setup Workspace**: Clone this repository into your local web server's root directory (e.g., `/srv/http/`, `/var/www/html/`, or `htdocs/`).
+3. **Database Initialization**: 
+   - Open your MySQL client (e.g., phpMyAdmin or CLI).
+   - Import the `database/tech_event.sql` file. This will automatically create the `tech_event` database, build all necessary tables, and inject seed data (including test users and events).
+4. **Environment Variables**:
+   - In the root of the project folder, locate or create a `.env` file.
+   - Configure your local database credentials like so:
+     ```ini
+     DB_HOST=localhost
+     DB_NAME=tech_event
+     DB_USER=root
+     DB_PASS=your_password
+     ```
+5. **Access the Site**: Open your browser and navigate to `http://localhost/srishti-awt/public/index.html`.
+   - *Note: To test admin permissions, you can log in with the seeded admin account `admin@test.com` (password: `123456`).*
 
-Once the form passes validation, the registration data is submitted using an **AJAX POST request**. AJAX allows the application to send and receive data from the server **without reloading the webpage**, creating a smoother and faster user experience. After successful submission, users receive immediate feedback confirming that their registration has been completed.
+## Database Schema Details
 
-On the server side, the application uses a **PHP backend** to process the incoming registration data and securely store it in a **MySQL database**. The database maintains records of all registered participants along with the events they have chosen. This structured storage allows administrators to easily manage event participation and retrieve information whenever required.
+The application uses an interconnected relational database featuring 5 primary tables:
 
-The system also includes a **Participant List feature**, which dynamically loads and displays the list of registered participants using AJAX. This allows users or event organizers to view updated participant information in real time without refreshing the page.
+- **`users`**
+  Stores both student and admin user accounts. Fields include `id`, `name`, `email`, `password` (hashed), `role` (user/admin), `phone`, `branch`, and `year_of_passing`.
+- **`events`**
+  Stores all events available at the TechFest. Managed by admins. Fields include `title`, `description`, `event_date`, `max_participants`, `event_type` (solo/team), `team_min`, and `team_max`.
+- **`event_registrations`**
+  The junction table for tracking solo event participations. Maps a `user_id` to an `event_id`.
+- **`teams`**
+  Tracks team creations for group events. Fields include `team_name`, `event_id` (foreign key to the event), and `created_by` (foreign key to the leader).
+- **`team_members`**
+  Maps multiple users to a single team. Fields include `team_id`, `user_id`, and `role` (ENUM: leader, member). Tied to `teams` with an `ON DELETE CASCADE` rule (deleting a team deletes its members).
 
-Several **advanced features** are incorporated to enhance the functionality of the portal. The system dynamically tracks the **number of available seats for each event** and updates the seat count whenever a new registration is completed. When the available seats reach zero, the system **automatically disables the registration button**, preventing further registrations and avoiding overbooking. Additionally, the portal displays **real-time seat availability**, helping students quickly identify which events still have open slots.
-
-Overall, the **Online Event Registration Portal** provides an efficient, reliable, and user-friendly platform for managing event registrations. By integrating modern web technologies such as **HTML, CSS, Bootstrap, jQuery, AJAX, PHP, and MySQL**, the system ensures smooth interaction between the frontend interface and backend database. The project demonstrates how web technologies can be effectively used to simplify administrative tasks, improve user experience, and provide a scalable solution for event management in educational institutions.
-
-# Team Details
+## Team Details
 
 | Member | Role | Task Description |
 | :--- | :--- | :--- |

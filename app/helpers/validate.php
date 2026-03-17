@@ -21,11 +21,11 @@ function isValidEmail($email)
 }
 
 /**
- * Validate phone number format (7–15 digits, allows spaces, +, -).
+ * Validate phone number format (exactly 10 digits).
  */
 function isValidPhone($phone)
 {
-    return preg_match('/^[\d\s\+\-]{7,15}$/', $phone);
+    return preg_match('/^\d{10}$/', $phone);
 }
 
 /**
