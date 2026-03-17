@@ -1253,6 +1253,7 @@
             flex-direction: column;
             gap: 10px;
             align-items: flex-end;
+            pointer-events: none;
         }
 
         .toast {
@@ -1274,6 +1275,7 @@
         .toast.show {
             transform: translateY(0) scale(1);
             opacity: 1;
+            pointer-events: all;
         }
 
         .toast svg {

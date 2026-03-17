@@ -1,4 +1,4 @@
-        /* ═══════════════════════════════════════════
+/* ═══════════════════════════════════════════
            USER SESSION — loaded from backend
         ═══════════════════════════════════════════ */
         let currentUser = null;
@@ -254,10 +254,79 @@
 
             const regBtn = document.getElementById('detailRegBtn');
             regBtn.disabled = full;
-            regBtn.textContent = full ? 'Fully Booked' : 'Register for this Event';
+            regBtn.innerHTML = full
+                ? '<svg viewBox="0 0 24 24" stroke-width="2" width="16" height="16" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg> Fully Booked'
+                : '<svg viewBox="0 0 24 24" stroke-width="2.5" width="16" height="16" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg> Register for this Event';
+
+            // Load participants immediately
+            loadParticipants(e.id);
 
             document.getElementById('detailOverlay').classList.add('open');
             document.body.style.overflow = 'hidden';
+        }
+
+        /* ═══════════════════════════════════════════
+           EVENT PARTICIPANTS
+        ═══════════════════════════════════════════ */
+        function loadParticipants(eventId) {
+            const list = document.getElementById('participantsList');
+            const countBadge = document.getElementById('participantsCount');
+
+            countBadge.textContent = '';
+            list.innerHTML = `
+                <div class="participants-loading">
+                    <span class="spinner"></span> Loading participants…
+                </div>`;
+
+            $.ajax({
+                url: 'api/events/get_event_participants.php',
+                type: 'GET',
+                data: { event_id: eventId },
+                dataType: 'json',
+                success: function(response) {
+                    if (response.success) {
+                        const participants = response.data;
+                        countBadge.textContent = participants.length + ' registered';
+
+                        if (!participants.length) {
+                            list.innerHTML = `
+                                <div class="participants-empty">
+                                    <svg viewBox="0 0 24 24" stroke-width="1.5" fill="none" stroke="currentColor">
+                                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                                        <circle cx="9" cy="7" r="4"/>
+                                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                                    </svg>
+                                    No one has registered yet.
+                                </div>`;
+                            return;
+                        }
+
+                        list.innerHTML = `
+                            <div class="participants-scroll">
+                                ${participants.map((p, i) => `
+                                    <div class="participant-row">
+                                        <div class="participant-avatar">
+                                            ${p.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)}
+                                        </div>
+                                        <div class="participant-info">
+                                            <div class="participant-name">${p.name}</div>
+                                            <div class="participant-email">${p.email}</div>
+                                        </div>
+                                        <div class="participant-index">#${i + 1}</div>
+                                    </div>
+                                `).join('')}
+                            </div>`;
+                    } else {
+                        countBadge.textContent = '';
+                        list.innerHTML = `<div class="participants-error">⚠️ Failed to load participants.</div>`;
+                    }
+                },
+                error: function() {
+                    countBadge.textContent = '';
+                    list.innerHTML = `<div class="participants-error">❌ Network error loading participants.</div>`;
+                }
+            });
         }
 
         function closeDetail() {
